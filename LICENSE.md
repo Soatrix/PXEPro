@@ -1,4 +1,4 @@
-Effective Date: 15/10/2024
+Effective Date: 30/09/2024
 
 This End User License Agreement ("EULA") is a legal agreement between you ("User") and Soatrix NZ Ltd. ("Company") for the use of PXE Pro ("Software").
 
