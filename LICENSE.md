@@ -1,4 +1,4 @@
-Effective Date: 15/10/2024
+Effective Date: 30/09/2024
 
 This End User License Agreement ("EULA") is a legal agreement between you ("User") and Soatrix NZ Ltd. ("Company") for the use of PXE Pro ("Software").
 
@@ -12,8 +12,9 @@ The Company grants you a non-exclusive, non-transferable, revocable license to u
 
 PXE Pro is offered under the following subscription plans:
 
-- Starter: Subscription price per machine per month. Maximum 100 client machines.
-- Lifetime: One-Time fee limited to 10 maximum client machines and includes Active Directory support.
+- Starter: Limited to 5 Active Machines, 1 Admin Account.
+- Pro: Limited to 25 Active Machines, 3 Admin Accounts, Expansion Drive Support.
+- Advanced: Limited to 100 Active Machines, Unlimited Admin Accounts, Expansion Drive Support, Auto Cleanup, and Active Directory Support.
 - Enterprise: Minimum 100 Active Machines, priced per machine with all Advanced features, designed for volume licensing.
 
 Subscriptions are billed on a monthly, quarterly, or yearly basis, based on the user’s choice at the time of purchase.
