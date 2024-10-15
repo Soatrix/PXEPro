@@ -1,0 +1,97 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% load stringfilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-cogs"></i> PXE Pro Settings</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">PXE Pro Settings</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" name="update" class="btn btn-primary float-right">Update Settings</button>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Success!</strong><br> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-8">
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">PXE Pro Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="pxepro_instance">PXE Pro Instance Name</label>
+                        <input type="text" class="form-control" name="pxepro_instance" id="pxepro_instance" value="{{ config.PXEPRO_INSTANCE }}" placeholder="PXE Pro Instance Name" required/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">Information</h5>
+                </div>
+                <div class="form-group">
+                    <div class="card-body">
+                        <label for="version">PXEPro Version</label>
+                        <input class="form-control" name="version" id="version" value="{{ PROJECT_VERSION }}" disabled="disabled"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">PXE Pro License</h5>
+                    <span class="badge badge-{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}success{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}warning{% else %}danger{% endif %} p-2 float-right">{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}Activated{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}Pending Activation{% else %}Not Activated{% endif %}</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="pxepro_license">License Key</label>
+                        <input class="form-control" name="pxepro_license" id="pxepro_license" value="{{ config.LICENSE_KEY }}" placeholder="Your PXEPro License Key"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="pxepro_license_secret">License Secret</label>
+                        <input type="password" class="form-control" name="pxepro_license" id="pxepro_license" value="{% if config.LICENSE_SECRET %}{{ config.LICENSE_SECRET }}{% else %}PXEPR-0000-0000-0000{% endif %}" disabled="disabled"/>
+                    </div>
+                    {% if not config.LICENSE_KEY %}
+                        <button type="submit" name="update" class="btn btn-primary float-right">Update License</button>
+                    {% else %}
+                        {% if not config.LICENSE_SECRET %}
+                            <button type="submit" name="activate" class="btn btn-success float-right">Activate License</button>
+                        {% else %}
+                            <button type="submit" name="deactivate" class="btn btn-danger float-right">Deactivate License</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+{% endblock %}

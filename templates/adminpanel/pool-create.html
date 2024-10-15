@@ -1,0 +1,80 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-database"></i> Create Pool</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-pools' %}">Pools</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create Pool</li>
+                </ol>
+            </nav>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Deleted!</strong><br> The client was successfully deleted.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>{{ error.title }}</strong><br>{{ error.description }}
+                {% if error.title != "System Error" %}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+			<div class="col-md-8">
+				<div class="card bg-gradient-gray-dark">
+					<div class="card-header">
+						<h3 class="card-title">Pool Configuration</h3>
+					</div>
+					<div class="card-body">
+						<div class="form-group">
+							<label for="inputPoolName">Pool Name</label>
+							<input type="text" class="form-control" id="inputPoolName" name="pool_name" placeholder="Unique name of your pool storage.">
+						</div>
+						<div class="form-group">
+							<label for="inputPoolDevice">Pool Device</label>
+							<select type="text" class="form-control" id="inputPoolDevice" name="pool_device" placeholder="Select unused disk or parition">
+								{% for device in available_devices %}
+									<option value="/dev/{{ device.name }}">/dev/{{ device.name }}: {{ device.size }}b</option>
+								{% endfor %}
+                                {% for partition in available_partitions %}
+                                    <option value="/dev/{{ partition.name }}">/dev/{{ partition.name }}: {{ partition.size }}</option>
+                                {% endfor %}
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card bg-gradient-gray-dark mb-3">
+					<div class="card-header">
+						<h3 class="card-title">Pool Information</h3>
+					</div>
+					<div class="card-body">
+						<div class="form-group">
+							<label for="outputPoolCapacity">Storage Capacity:</label>
+							<input type="text" class="form-control disabled bg-dark" id="outputPoolCapacity" placeholder="--" disabled>
+						</div>
+						<div class="form-group">
+							<label for="outputPoolMountpoint">Mount Point:</label>
+							<input type="text" class="form-control disabled bg-dark" id="outputPoolMountpoint" placeholder="--" disabled>
+						</div>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-primary float-sm-right">Create Pool</button>
+			</div>
+		</div>
+</form>
+{% endblock %}

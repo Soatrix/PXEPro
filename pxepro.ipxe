@@ -1,0 +1,4 @@
+#!ipxe
+dhcp                  # Get an IP address via DHCP
+sleep 3               # Wait for 3 seconds
+chain http://${next-server}/pxe/${net0/mac:hexhyp}/  # Chainload using the next-server IP from DHCP

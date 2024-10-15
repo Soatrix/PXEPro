@@ -1,0 +1,94 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-wifi"></i> DHCP Settings</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-settings' %}">Settings</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">DHCP Settings</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary float-right">Update Settings</button>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Success!</strong><br> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">TFTP Server Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="enable_tftp_server" name="enable_tftp_server" {% if config.ENABLE_TFTP_SERVER %}checked="checked"{% endif %}>
+                            <label class="form-check-label" for="enable_tftp_server">Enable TFTP Server</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tftp_server_root">TFTP Root Directory</label>
+                        <input class="form-control" name="tftp_server_root" id="tftp_server_root" value="{{ config.TFTP_SERVER_ROOT }}" placeholder="/var/lib/tftpboot/"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="tftp_pe_root">TFTP Windows PE Directory</label>
+                        <input class="form-control" name="tftp_pe_root" id="tftp_pe_root" value="{{ config.TFTP_PE_ROOT }}" placeholder="/var/lib/peboot/"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="tftp_li_root">TFTP Linux INITRD Directory</label>
+                        <input class="form-control" name="tftp_li_root" id="tftp_li_root" value="{{ config.TFTP_LI_ROOT }}" placeholder="/var/lib/liboot/"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">DHCP Server Settings</h5>
+                    <span class="badge badge-{% if config.ENABLE_DHCP_SERVER %}success{% else %}warning{% endif %} float-right">{% if config.ENABLE_DHCP_SERVER %}DHCP Server Enabled{% else %}DHCP Proxy Enabled{% endif %}</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="enable_dhcp_server" name="enable_dhcp_server" {% if config.ENABLE_DHCP_SERVER %}checked="checked"{% endif %}>
+                            <label class="form-check-label" for="enable_dhcp_server">Enable DHCP Proxy / DHCP Server</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dhcp_min_range">DHCP Address Range Min.</label>
+                        <input class="form-control {% if not config.ENABLE_DHCP_SERVER %}bg-dark{% endif %}" name="dhcp_min_range" id="dhcp_min_range" {% if config.ENABLE_DHCP_SERVER %}value="{{ config.DHCP_MIN_RANGE }}" placeholder="DHCP Address Min. Range"{% endif %} {% if not config.ENABLE_DHCP_SERVER %}disabled="disabled"{% endif %}/>
+                    </div>
+                    <div class="form-group">
+                        <label for="dhcp_max_range">DHCP Address Range Max.</label>
+                        <input class="form-control {% if not config.ENABLE_DHCP_SERVER %}bg-dark{% endif %}" name="dhcp_max_range" id="dhcp_max_range" {% if config.ENABLE_DHCP_SERVER %}value="{{ config.DHCP_MAX_RANGE }}" placeholder="DHCP Address Max. Range"{% endif %} {% if not config.ENABLE_DHCP_SERVER %}disabled="disabled"{% endif %}/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+{% endblock %}

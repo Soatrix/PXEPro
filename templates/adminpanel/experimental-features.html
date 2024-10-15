@@ -1,0 +1,106 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-box-open"></i> Experimental Features</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-settings' %}">Settings</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Experiemental Features</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary float-right">Apply Configuration</button>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Configuration Updated!</strong><br> The experimental feature configuration was successfully updated and applied.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+        <p><strong>Please Note:</strong> These features are experimental and may have unidentified problems or bugs. Use of these features is at the complete risk and responsibility of the administrator.</p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">Rename Client Machines</h5>
+                    <div class="form-check form-switch float-right">
+                        <input class="form-check-input h-100 w-100" type="checkbox" role="switch" id="enable_client_rename" name="enable_client_rename" {% if config.ENABLE_CLIENT_RENAME %}checked="checked"{% endif %}>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="enable_linux_rename" name="enable_linux_rename" {% if config.ENABLE_LINUX_RENAME %}checked="checked"{% endif %}>
+                                    <label class="form-check-label" for="enable_linux_rename">Rename Linux Hostnames</label>
+                                </div>
+                                <p>This will modify the hostname file located at <span class="badge badge-secondary"><code class="text-white">/etc/hostname</code></span> before boot to match the name in PXE Pro.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="enable_windows_rename" name="enable_windows_rename" {% if config.ENABLE_WINDOWS_RENAME %}checked="checked"{% endif %}>
+                                    <label class="form-check-label" for="enable_windows_rename">Rename Windows Device Names</label>
+                                </div>
+                                <p>This will modify the offline SYSTSEM hive of the Windows registry and update the values in both <span class="badge badge-secondary"><code class="text-white">HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Tcpip\Parameters</code></span> and <span class="badge badge-secondary"><code class="text-white">HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\ComputerName\ComputerName</code></span> to match the client name in PXE Pro.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">Active Directory Support</h5>
+                    <div class="form-check form-switch float-right">
+                        <input class="form-check-input h-100 w-100" type="checkbox" role="switch" id="enable_active_directory" name="enable_active_directory" {% if config.ENABLE_ACTIVE_DIRECTORY %}checked="checked"{% endif %}>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="domain_name">Domain Name</label>
+                                <input class="form-control" id="domain_name" name="domain_name" placeholder="Active Directory NETBIOS Name..." value="{{ config.ACTIVE_DIRECTORY_NAME }}"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="domain_controller_address">Domain Controller IP</label>
+                                <input class="form-control" id="domain_controller_address" name="domain_controller_address" placeholder="Domain Controller IP Address..." value="{{ config.ACTIVE_DIRECTORY_CONTROLLER }}"/>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <p><strong>Note:</strong> To properly support Active Directory you must download and install the "PXEPro Domain Provisioner" application to your Windows server containing your active directory controller. This allows it to automatically generate workstation provisioning blobs that can be passed to the workstation at boot time.</p>
+                            <p><strong>Important:</strong> You must enable "One-Time Reboot" on your client, this will allow your client to import the provisioned workstation blob and upon reboot start the standard domain joining process and present you with your domain login screen.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</form>
+{% endblock %}

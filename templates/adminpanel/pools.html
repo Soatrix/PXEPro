@@ -1,0 +1,75 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-database"></i> Pools</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Pools</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-custom-secondary ml-auto float-right" id="add-pool-tab" href="{% url 'admin-pool-create' %}"><i class="fas fa-plus"></i> Create Pool</a>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Deleted!</strong><br> The client was successfully deleted.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    <div class="card text-dark mb-3">
+        <div class="card-header">
+            <h5 class="card-title text-white float-left">Storage Pools ({{ POOLS.count }} Total)</h5>
+        </div>
+        <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>NAME</th>
+                    <th>VOLUME</th>
+                    <th>IMAGES</th>
+                    <th>CAPACITY</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pool in POOLS %}
+                    <tr>
+                        <td>{{ pool.name }}</td>
+                        <td><span class="badge bg-dark">{{ pool.path }}</span></td>
+                        <td><span class="badge bg-dark">{{ pool.image_set.all|length }}</span></td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" aria-label="array-progress" style="width: {{ pool.used|array_percentage:pool.size }}%" aria-valuenow="{{ pool.used|array_percentage:pool.size }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            {{ pool.used|bytes_size_str }} / {{ pool.size|bytes_size_str }}
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <i class="fas fa-ellipsis dropdown-toggle" type="button" id="dropdownMenu{{ image.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">									</i>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu{{ pool.id }}">
+                                    <button type="button" class="dropdown-item danger-hover pool-delete" id="deletePoolButton" value="{{ pool.id }}">Delete</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+{% endblock %}

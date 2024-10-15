@@ -1,0 +1,9 @@
+django
+django-mathfilters
+django-constance[redis]
+psutil
+pexpect
+requests
+cython
+setuptools
+waitress
