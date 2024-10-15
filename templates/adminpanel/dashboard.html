@@ -1,0 +1,342 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+
+    {% if platform == "Windows" %}
+        <div class="alert alert-danger">
+            <strong>Platform Error</strong><br>Windows is not currently supported for hosting your storage pools. Please reinstall PXE Pro on a Debian or other Linux operating system.
+        </div>
+    {% endif %}
+
+<!-- Content Row -->
+<div class="row">
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-info shadow py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+					<div class="col">
+						<div class="font-weight-bold text-info text-uppercase m-1">Clients</div>
+						<div class="h5 mb-0 font-weight-bold">{{ CLIENTS.count }}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-network-wired fa-2x text-info"></i>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-warning shadow py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+					<div class="col">
+						<div class="font-weight-bold text-warning text-uppercase m-1">Boot Images</div>
+						<div class="h5 mb-0 font-weight-bold">{{ BOOTIMAGES.count }}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-server fa-2x text-warning"></i>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-danger shadow py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+					<div class="col">
+						<div class="font-weight-bold text-danger text-uppercase m-1">Active iSCSi</div>
+						<div class="h5 mb-0 font-weight-bold">{{ TARGETS.count }}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-ethernet fa-2x text-danger"></i>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card border-left-success shadow py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+					<div class="col">
+						<div class="font-weight-bold text-success text-uppercase m-1">Data Images</div>
+						<div class="h5 mb-0 font-weight-bold">{{ DATAIMAGES.count }}</div>
+					</div>
+					<div class="col-auto">
+						<i class="fas fa-cloud fa-2x text-success"></i>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-12 col-lg-12">
+        <div class="card shadow mb-4">
+            <!-- Card Body -->
+            <div class="card-body">
+                <p class="text-dark">You are running {{  PROJECT_NAME }} version <code>{{ PROJECT_VERSION }}</code> on {{ platform }} {{ platform_version }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-12">
+
+        <div class="card text-dark shadow  mb-3">
+            <div class="card-header">
+                <h5 class="card-title text-white float-left">All Clients ({{ CLIENTS.count }} Total)</h5>
+            </div>
+            <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>NAME</th>
+                        <th>STATUS</th>
+                        <th>IP</th>
+                        <th>MAC ADDRESS</th>
+                        <th>IMAGE</th>
+                        <th>RUNTIME</th>
+                        <th>SENT</th>
+                        <th>RECEIVED</th>
+                        <th>SPEED</th>
+                        <th>SIZE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in CLIENTS %}
+                        <tr class="client-row" data-client-id="{{ client.id }}">
+                            <td>{{ client.name }}</td>
+                            <td id="onlineStatus-{{ client.id }}">
+                                {% if client.is_online %}
+                                    <span class="badge badge-success"><i class="fas fa-check"></i></span>
+                                {% else %}
+                                    <span class="badge badge-danger"><i class="fas fa-xmark"></i></span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-dark">{{ client.ip }}</span></td>
+                            <td><span class="badge bg-dark">{{ client.mac_address }}</span></td>
+                            <td><span class="badge bg-dark">{{ client.image.name }}</span></td>
+                            <td><span class="badge bg-dark" id="client-runtime-{{ client.id }}">00:00:00</span></td>
+                            <td><span class="badge bg-dark" id="uploadSpeed-{{ client.id }}">0 Bps</span></td>
+                            <td><span class="badge bg-dark" id="downloadSpeed-{{ client.id }}">0 Bps</span></td>
+                            <td><span class="badge bg-dark" id="totalSpeed-{{ client.id }}">0 Bps</span></td>
+                            <td><span class="badge bg-dark" id="totalSize-{{ client.id }}">0 B</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card text-dark shadow  mb-3">
+            <div class="card-header">
+                <h5 class="card-title text-white float-left">Storage Pools ({{ POOLS.count }} Total)</h5>
+            </div>
+            <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>NAME</th>
+                        <th>VOLUME</th>
+                        <th>IMAGES</th>
+                        <th>CAPACITY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pool in POOLS %}
+                        <tr>
+                            <td>{{ pool.name }}</td>
+                            <td><span class="badge bg-dark">{{ pool.path }}</span></td>
+                            <td><span class="badge bg-dark">{{ pool.image_set.all|length }}</span></td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" aria-label="array-progress" style="width: {{ pool.used|array_percentage:pool.size }}%" aria-valuenow="{{ pool.used|array_percentage:pool.size }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                {{ pool.used|bytes_size_str }} / {{ pool.size|bytes_size_str }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card text-dark shadow mb-3">
+            <div class="card-header">
+                <h5 class="card-title text-white float-left">All Images ({{ IMAGES.count }} Total)</h5>
+            </div>
+            <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>NAME</th>
+                        <th>POOL</th>
+                        <th>VOLUME</th>
+                        <th>CAPACITY</th>
+                        <th>DEFAULT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for image in IMAGES %}
+                        <tr>
+                                <td>{{ image.name }}</td>
+                            <td><span class="badge bg-primary">{{ image.zfs_dataset }}</span></td>
+                            <td><span class="badge bg-dark">{{ image.zfs_volume }}</span></td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" aria-label="array-progress" style="width: {{ image.used|array_percentage:image.size_bytes }}%" aria-valuenow="{{ image.used|array_percentage:image.size_bytes }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                {{ image.used|bytes_size_str }} / {{ image.size_bytes|bytes_size_str }}
+                            </td>
+                            <td>
+                                {% if image.is_default %}
+                                    <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="fas fa-xmark"></i></span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+// Store timers for clients
+let clientTimers = {};
+
+$(document).ready(function() {
+    // Event delegation for client delete modal
+    $(document).on("click", ".client-delete", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmDeleteButton").val(activeClient);
+        var clientsModal = new bootstrap.Modal(document.getElementById('deleteClientModal'), {
+            keyboard: false
+        });
+        clientsModal.show();
+    });
+
+    // Event delegation for clear writeback modal
+    $(document).on("click", ".clear-writeback", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmClearButton").val(activeClient);
+        var clearwritebackModal = new bootstrap.Modal(document.getElementById('clearWritebacksModal'), {
+            keyboard: false
+        });
+        clearwritebackModal.show();
+    });
+
+    // Event delegation for apply writeback modal
+    $(document).on("click", ".apply-writeback", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmWritebackButton").val(activeClient);
+        var writebackModal = new bootstrap.Modal(document.getElementById('applyWritebacksModal'), {
+            keyboard: false
+        });
+        writebackModal.show();
+    });
+
+    // Start polling client stats every 2 seconds
+    setInterval(refreshClientStats, 2000);
+
+    // Run once immediately when the page loads
+    refreshClientStats();
+});
+
+function updateClientStats(clientId) {
+    $.ajax({
+        url: '/admin/client/stats/' + clientId + '/',  // Assuming this is the URL for stats
+        method: 'GET',
+        success: function(response) {
+            // Update upload speed, download speed, and total speed
+            $("#uploadSpeed-" + clientId).text(formatSpeed(response.upload_speed));
+            $("#downloadSpeed-" + clientId).text(formatSpeed(response.download_speed));
+            let totalSpeed = response.upload_speed + response.download_speed;
+            $("#totalSpeed-" + clientId).text(formatSpeed(totalSpeed));
+            $("#totalSize-" + clientId).text(formatSpeed(response.size).replace("ps", ""));
+
+            // Update the online status indicator
+            let onlineStatusHtml = response.online
+                ? '<span class="badge badge-success"><i class="fas fa-check"></i></span>'
+                : '<span class="badge badge-danger"><i class="fas fa-xmark"></i></span>';
+            if ($("#onlineStatus-" + clientId).html() !== onlineStatusHtml) {
+                $("#onlineStatus-" + clientId).html(onlineStatusHtml);
+            }
+
+            // Handle the client timer if online
+            if (response.online) {
+                startClientTimer(clientId, response.snapshot.time);
+            } else {
+                stopClientTimer(clientId);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching stats for client " + clientId + ": " + error);
+        }
+    });
+}
+
+// Helper function to format speed
+function formatSpeed(speed) {
+    if (speed >= 1e9) {
+        return (speed / 1e9).toFixed(2) + ' GBps';
+    } else if (speed >= 1e6) {
+        return (speed / 1e6).toFixed(2) + ' MBps';
+    } else if (speed >= 1e3) {
+        return (speed / 1e3).toFixed(2) + ' KBps';
+    } else {
+        return speed + ' Bps';
+    }
+}
+
+// Refresh client stats every 2 seconds
+function refreshClientStats() {
+    $(".client-row").each(function() {
+        var clientId = $(this).data("client-id");
+        updateClientStats(clientId);
+    });
+}
+
+// Function to start or update client timers
+function startClientTimer(clientId, isoStartTime) {
+    if (clientTimers[clientId]) {
+        // Timer already running, no need to reset it
+        return;
+    }
+
+    // Parse the start time
+    let startTime = new Date(isoStartTime);
+
+    // Start or update the timer every second
+    clientTimers[clientId] = setInterval(function() {
+        let now = new Date();
+        let elapsed = new Date(now - startTime);
+
+        let hours = elapsed.getUTCHours();
+        let minutes = elapsed.getUTCMinutes();
+        let seconds = elapsed.getUTCSeconds();
+
+        // Format the elapsed time as a string
+        let timeString = (hours.toString().padStart(2, '0') + ':' +
+            minutes.toString().padStart(2, '0') + ':' +
+            seconds.toString().padStart(2, '0'));
+
+        // Update the timer display for the client
+        document.getElementById('client-runtime-' + clientId).textContent = timeString;
+    }, 1000); // Update every second
+}
+
+// Function to stop a client's timer
+function stopClientTimer(clientId) {
+    if (clientTimers[clientId]) {
+        clearInterval(clientTimers[clientId]);
+        delete clientTimers[clientId];
+    }
+}
+</script>
+{% endblock %}

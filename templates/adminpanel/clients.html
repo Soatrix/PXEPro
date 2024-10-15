@@ -1,0 +1,328 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-network-wired"></i> Clients</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Clients</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" name="clearAllWritebacks" class="btn btn-danger float-right"><i class="fas fa-trash"></i> Clear All Writebacks</button>
+            <button type="submit" name="wakeAll" class="btn btn-primary float-right mr-3"><i class="fas fa-power-off"></i> Power On All Clients</button>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Success!</strong><br> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    <div class="card text-dark mb-3">
+        <div class="card-header">
+            <h5 class="card-title text-white float-left">All Clients ({{ CLIENTS.count }} Total)</h5>
+        </div>
+        <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>NAME</th>
+					<th>STATUS</th>
+					<th>IP</th>
+					<th>MAC ADDRESS</th>
+					<th>IMAGE</th>
+                    <th>PLATFORM</th>
+					<th>RUNTIME</th>
+					<th>SENT</th>
+					<th>RECEIVED</th>
+					<th>SPEED</th>
+                    <th>SIZE</th>
+					<th></th>
+                </tr>
+            </thead>
+            <tbody>
+				{% for client in CLIENTS %}
+                    <tr class="client-row" data-client-id="{{ client.id }}">
+                        <td>{{ client.name }}</td>
+                        <td id="onlineStatus-{{ client.id }}">
+                            {% if client.is_online %}
+                                <span class="badge badge-success"><i class="fas fa-check"></i></span>
+                            {% else %}
+                                <span class="badge badge-danger"><i class="fas fa-xmark"></i></span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-dark">{{ client.ip }}</span></td>
+                        <td><span class="badge bg-dark">{{ client.mac_address }}</span></td>
+                        <td><span class="badge bg-dark">{{ client.image.name }}</span></td>
+                        <td><span class="badge bg-dark">{{ client.get_system_type }}</span></td>
+                        <td><span class="badge bg-dark" id="client-runtime-{{ client.id }}">00:00:00</span></td>
+                        <td><span class="badge bg-dark" id="uploadSpeed-{{ client.id }}">0 Bps</span></td>
+                        <td><span class="badge bg-dark" id="downloadSpeed-{{ client.id }}">0 Bps</span></td>
+                        <td><span class="badge bg-dark" id="totalSpeed-{{ client.id }}">0 Bps</span></td>
+                        <td><span class="badge bg-dark" id="totalSize-{{ client.id }}">0 B</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <i class="fas fa-ellipsis dropdown-toggle" type="button" id="dropdownMenuToggle-{{ client.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuToggle-{{ client.id }}" id="dropdownMenu-{{ client.id }}">
+                                    {% if client.snapshot and not client.is_online %}
+                                        <button type="button" class="dropdown-item primary-hover apply-writeback" id="applyWritebacksButton" value="{{ client.id }}">Apply Writebacks</button>
+                                        <button type="button" class="dropdown-item danger-hover clear-writeback" id="clearWritebacksButton" value="{{ client.id }}">Clear Writebacks</button>
+                                        <div class="dropdown-divider"></div>
+                                    {% elif not client.is_online %}
+                                        <button type="submit" class="dropdown-item danger-hover" id="wakeLan" name="wakeLan" value="{{ client.id }}">Power On</button>
+                                        <div class="dropdown-divider"></div>
+                                    {% endif %}
+                                    <a class="dropdown-item" href="#">Edit</a>
+                                    {% if not client.is_online %}
+                                        <div class="dropdown-divider"></div>
+                                        <button type="button" class="dropdown-item danger-hover client-delete" id="deleteClientButton" value="{{ client.id }}">Delete</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="modal fade" id="deleteClientModal" tabindex="-1" role="dialog" aria-labelledby="deleteClientModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-gradient-gray-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteClientModalLabel">Are You Sure?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<strong>Please Note:</strong> This is an irreversible process. This will delete the client and any associated client snapshots or writebacks.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Actually, never mind.</button>
+					<button type="submit" name="delete" id="confirmDeleteButton" class="btn btn-danger">Yes, I'm sure.</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="clearWritebacksModal" tabindex="-1" role="dialog" aria-labelledby="clearWritebacksModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-gradient-gray-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="clearWritebacksModalLabel">Are You Sure?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<strong>Please Note:</strong> This is an irreversible process. Clearing writebacks will remove any and all cached data on the system restoring all images to the most recently saved snapshot state. This also means any data from clients using keep-writebacks will be deleted unless saved as a snapshot.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Actually, never mind.</button>
+					<button type="submit" name="clearWritebacks" id="confirmClearButton" class="btn btn-danger">Yes, I'm sure.</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="applyWritebacksModal" tabindex="-1" role="dialog" aria-labelledby="applyWritebacksModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-gradient-gray-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteClientModalLabel">Apply Writebacks to Image</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<strong>Please Note:</strong> This will modify this existing client snapshot into a global image snapshot which will be stacked on the associated image.
+					<div class="form-group">
+						<label for="writebackLabel">Snapshot Description</label>
+						<input class="form-control" type="text" id="writebackLabel" name="writebackLabel" placeholder="e.g. Some Updates"/>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+					<button type="submit" name="applyWriteback" id="confirmWritebackButton" class="btn btn-primary">Apply Writebacks</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+// Store timers for clients
+let clientTimers = {};
+
+$(document).ready(function() {
+    // Event delegation for client delete modal
+    $(document).on("click", ".client-delete", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmDeleteButton").val(activeClient);
+        var clientsModal = new bootstrap.Modal(document.getElementById('deleteClientModal'), {
+            keyboard: false
+        });
+        clientsModal.show();
+    });
+
+    // Event delegation for clear writeback modal
+    $(document).on("click", ".clear-writeback", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmClearButton").val(activeClient);
+        var clearwritebackModal = new bootstrap.Modal(document.getElementById('clearWritebacksModal'), {
+            keyboard: false
+        });
+        clearwritebackModal.show();
+    });
+
+    // Event delegation for apply writeback modal
+    $(document).on("click", ".apply-writeback", function(event) {
+        var activeClient = $(event.target).val();
+        $("#confirmWritebackButton").val(activeClient);
+        var writebackModal = new bootstrap.Modal(document.getElementById('applyWritebacksModal'), {
+            keyboard: false
+        });
+        writebackModal.show();
+    });
+
+    // Start polling client stats every 2 seconds
+    setInterval(refreshClientStats, 2000);
+
+    // Run once immediately when the page loads
+    refreshClientStats();
+});
+
+function updateClientStats(clientId) {
+    $.ajax({
+        url: '/admin/client/stats/' + clientId + '/',  // Assuming this is the URL for stats
+        method: 'GET',
+        success: function(response) {
+            // Update upload speed, download speed, and total speed
+            $("#uploadSpeed-" + clientId).text(formatSpeed(response.upload_speed));
+            $("#downloadSpeed-" + clientId).text(formatSpeed(response.download_speed));
+            let totalSpeed = response.upload_speed + response.download_speed;
+            $("#totalSpeed-" + clientId).text(formatSpeed(totalSpeed));
+            $("#totalSize-" + clientId).text(formatSpeed(response.size).replace("ps", ""));
+
+            // Update the online status indicator
+            let onlineStatusHtml = response.online
+                ? '<span class="badge badge-success"><i class="fas fa-check"></i></span>'
+                : '<span class="badge badge-danger"><i class="fas fa-xmark"></i></span>';
+            if ($("#onlineStatus-" + clientId).html() !== onlineStatusHtml) {
+                $("#onlineStatus-" + clientId).html(onlineStatusHtml);
+            }
+
+            // Update the dropdown menu based on online status
+            let dropdownMenu = '';
+            if (response.snapshot && !response.online) {
+                dropdownMenu += `
+                    <button type="button" class="dropdown-item primary-hover apply-writeback" id="applyWritebacksButton" value="${clientId}">Apply Writebacks</button>
+                    <button type="button" class="dropdown-item danger-hover clear-writeback" id="clearWritebacksButton" value="${clientId}">Clear Writebacks</button>
+                    <div class="dropdown-divider"></div>`;
+            } else if (!response.online) {
+                dropdownMenu += `
+                    <button type="submit" class="dropdown-item danger-hover" id="wakeLan" name="wakeLan" value="${clientId}">Power On</button>
+                    <div class="dropdown-divider"></div>`;
+            }
+            dropdownMenu += `
+                <a class="dropdown-item" href="#">Edit</a>`
+            if(!response.online) {
+                dropdownMenu += `
+                <div class="dropdown-divider"></div>
+                <button type="button" class="dropdown-item danger-hover client-delete" id="deleteClientButton" value="${clientId}">Delete</button>`
+            }
+            // Update dropdown if changed
+            if ($("#dropdownMenu-" + clientId).html() !== dropdownMenu) {
+                console.log("Updating menu for " + clientId);
+                $("#dropdownMenu-" + clientId).html(dropdownMenu);
+            }
+
+            // Handle the client timer if online
+            if (response.online) {
+                startClientTimer(clientId, response.snapshot.time);
+            } else {
+                stopClientTimer(clientId);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error fetching stats for client " + clientId + ": " + error);
+        }
+    });
+}
+
+// Helper function to format speed
+function formatSpeed(speed) {
+    if (speed >= 1e9) {
+        return (speed / 1e9).toFixed(2) + ' GBps';
+    } else if (speed >= 1e6) {
+        return (speed / 1e6).toFixed(2) + ' MBps';
+    } else if (speed >= 1e3) {
+        return (speed / 1e3).toFixed(2) + ' KBps';
+    } else {
+        return speed + ' Bps';
+    }
+}
+
+// Refresh client stats every 2 seconds
+function refreshClientStats() {
+    $(".client-row").each(function() {
+        var clientId = $(this).data("client-id");
+        updateClientStats(clientId);
+    });
+}
+
+// Function to start or update client timers
+function startClientTimer(clientId, isoStartTime) {
+    if (clientTimers[clientId]) {
+        // Timer already running, no need to reset it
+        return;
+    }
+
+    // Parse the start time
+    let startTime = new Date(isoStartTime);
+
+    // Start or update the timer every second
+    clientTimers[clientId] = setInterval(function() {
+        let now = new Date();
+        let elapsed = new Date(now - startTime);
+
+        let hours = elapsed.getUTCHours();
+        let minutes = elapsed.getUTCMinutes();
+        let seconds = elapsed.getUTCSeconds();
+
+        // Format the elapsed time as a string
+        let timeString = (hours.toString().padStart(2, '0') + ':' +
+            minutes.toString().padStart(2, '0') + ':' +
+            seconds.toString().padStart(2, '0'));
+
+        // Update the timer display for the client
+        document.getElementById('client-runtime-' + clientId).textContent = timeString;
+    }, 1000); // Update every second
+}
+
+// Function to stop a client's timer
+function stopClientTimer(clientId) {
+    if (clientTimers[clientId]) {
+        clearInterval(clientTimers[clientId]);
+        delete clientTimers[clientId];
+    }
+}
+</script>
+{% endblock %}

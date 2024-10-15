@@ -1,0 +1,113 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% load mathfilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-server"></i> Images</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-images' %}">Images</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">New Image</li>
+                </ol>
+            </nav>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Deleted!</strong><br> The client was successfully deleted.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>{{ error.title }}</strong><br>{{ error.desc }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+		<div class="col-md-8">
+			<div class="card bg-gradient-gray-dark mb-3">
+				<div class="card-header">
+					<h5 class="card-title text-white float-left">Image Configurations</h5>
+				</div>
+				<div class="card-body">
+					<div class="form-group">
+						<label for="inputImageName">Image Name</label>
+						<input type="text" class="form-control" id="inputImageName" name="image_name" placeholder="Unique name of your image.">
+					</div>
+					<div class="form-group">
+						<label for="inputImagePool">Image Pool</label>
+						<select type="text" class="form-control" id="inputImagePool" name="image_pool" placeholder="Select unused disk or parition">
+							{% for pool in POOLS %}
+								<option value="{{ pool.path }}">{{ pool.name }} ({{ pool.path }}) - {{ pool.size|sub:pool.used|bytes_size_str }} Remaining</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="inputImageSize">Image Size</label>
+						<div class="input-group">
+							<input type="text" class="form-control" id="inputImageSize" name="image_size" placeholder="GB Size of Image">
+							<div class="input-group-append">
+								<span class="input-group-text" id="basic-addon2">GB</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h5 class="card-title text-white float-left">Images Information</h5>
+				</div>
+				<div class="card-body">
+					<div class="form-group">
+						<label for="outputPoolCapacity">Image Block Path:</label>
+						<input type="text" class="form-control disabled bg-dark text-white" id="outputImagePath" name="image_path" placeholder="/zpool/pxepro/<name>" value="/zpool/pxepro/<name>" disabled>
+					</div>
+					<div class="form-group">
+						<label for="outputImageDefault">Default Image:</label>
+						<div id="outputImageDefault" class="form-check">
+							<input class="form-check-input" type="checkbox" value="True" id="inputImageDefault" name="image_default">
+							<label class="form-check-label" for="flexCheckChecked">
+								If ticked, new clients will boot from this image.
+							</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="bootImageDefault">Boot Image:</label>
+						<div id="bootImageDefault" class="form-check">
+							<input class="form-check-input" type="checkbox" value="True" id="bootImage" name="image_boot">
+							<label class="form-check-label" for="flexCheckChecked">
+								If ticked, clients will be able to boot from this device. If unticked, clients will be able to see this device as additional storage.
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<button type="submit" class="btn btn-primary float-end">Create Image</button>
+		</div>
+	</div>
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+	$("#inputImageName").keyup(function() {
+		var poolPath = $("#inputImagePool").find(":selected").val();
+		$("#outputImagePath").val(poolPath + "/" + $(this).val())
+	});
+	$("#inputImageName").click(function() {
+		var poolPath = $("#inputImagePool").find(":selected").val();
+		$("#outputImagePath").val(poolPath + "/" + $(this).val())
+	});
+	$("#inputImagePool").click(function() {
+		var poolPath = $("#inputImagePool").find(":selected").val();
+		$("#outputImagePath").val(poolPath + "/" + $("#inputImageName").val())
+	});
+</script>
+{% endblock %}

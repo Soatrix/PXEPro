@@ -1,0 +1,118 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-server"></i> Images</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Images</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-custom-secondary ml-auto float-right" id="add-image-tab" href="{% url 'admin-image-create' %}"><i class="fas fa-plus"></i> Create Image</a>
+        </div>
+        {% if success %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ object }} Deleted!</strong><br> The image was successfully deleted.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% elif error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong><br>{{ error|safe }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    <div class="card text-dark mb-3">
+        <div class="card-header">
+            <h5 class="card-title text-white float-left">All Images ({{ IMAGES.count }} Total)</h5>
+        </div>
+        <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>NAME</th>
+					<th>POOL</th>
+					<th>VOLUME</th>
+                    <th>CAPACITY</th>
+					<th>DEFAULT</th>
+					<th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in IMAGES %}
+					<tr>
+							<td>{{ image.name }}</td>
+						<td><span class="badge bg-primary">{{ image.zfs_dataset }}</span></td>
+						<td><span class="badge bg-dark">{{ image.zfs_volume }}</span></td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" aria-label="array-progress" style="width: {{ image.used|array_percentage:image.size_bytes }}%" aria-valuenow="{{ image.used|array_percentage:image.size_bytes }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            {{ image.used|bytes_size_str }} / {{ image.size_bytes|bytes_size_str }}
+                        </td>
+						<td>
+							{% if image.is_default %}
+								<span class="badge bg-success"><i class="fas fa-check"></i></span>
+							{% else %}
+								<span class="badge bg-danger"><i class="fas fa-xmark"></i></span>
+							{% endif %}
+						</td>
+						<td>
+							<div class="dropdown">
+								<i class="fas fa-ellipsis dropdown-toggle" type="button" id="dropdownMenu{{ image.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenu{{ image.id }}">
+									<a class="dropdown-item" href="{% url 'admin-image-edit' id=image.id %}">Edit</a>
+									<div class="dropdown-divider"></div>
+									<button type="button" class="dropdown-item danger-hover image-delete" id="deleteImageButton" value="{{ image.id }}">Delete</button>
+								</div>
+							</div>
+						</td>
+					</tr>
+				{% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+	<div class="modal fade" id="deleteImageModal" tabindex="-1" role="dialog" aria-labelledby="deleteImageModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-gradient-gray-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteClientModalLabel">Are You Sure?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<strong>Please Note:</strong> This is an irreversible process. Clearing writebacks will remove any and all cached data on the system restoring all images to the most recently saved snapshot state. This also means any data from clients using keep-writebacks will be deleted unless saved as a snapshot.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Actually, never mind.</button>
+					<button type="submit" name="delete" id="confirmDeleteButton" class="btn btn-danger">Yes, I'm sure.</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+	var clientsModal = new bootstrap.Modal(document.getElementById('deleteImageModal'), {
+		keyboard: false
+	});
+	$(".image-delete").on("click", function(event) {
+		var activeClient = $(event.target).val();
+		$("#confirmDeleteButton").val(activeClient);
+		clientsModal.show();
+	});
+</script>
+{% endblock %}
