@@ -1,0 +1,9 @@
+{
+    "SECRET_KEY": "your-secret-key-here",
+    "ALLOWED_HOSTS": [],
+    "CSRF_TRUSTED_ORIGINS": [],
+    "TIME_ZONE": "UTC",
+    "LANGUAGE_CODE": "en-us",
+    "PROJECT_VERSION": "0.1-DEV",
+	"ENVIRONMENT": "production"
+}
