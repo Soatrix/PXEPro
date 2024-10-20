@@ -7,3 +7,4 @@ requests
 cython
 setuptools
 waitress
+sentry-sdk
