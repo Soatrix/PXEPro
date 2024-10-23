@@ -10341,7 +10341,9 @@ jQuery.parseHTML = function( data, context, keepScripts ) {
 
 	// Single tag
 	if ( parsed ) {
-		return [ context.createElement( parsed[ 1 ] ) ];
+		// Sanitize the parsed tag name to prevent XSS
+		var tagName = parsed[ 1 ].replace(/[^a-zA-Z0-9-]/g, '');
+		return [ context.createElement( tagName ) ];
 	}
 
 	parsed = buildFragment( [ data ], context, scripts );
