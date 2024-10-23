@@ -135,6 +135,9 @@
         selector = hrefAttr && hrefAttr !== '#' ? hrefAttr.trim() : '';
       }
 
+      // Sanitize the selector to prevent XSS
+      selector = CSS.escape(selector);
+
       try {
         return document.querySelector(selector) ? selector : null;
       } catch (_) {
@@ -1114,7 +1117,7 @@
         return;
       }
 
-      var target = $__default['default'](selector)[0];
+      var target = $__default['default'](document).find(selector)[0];
 
       if (!target || !$__default['default'](target).hasClass(CLASS_NAME_CAROUSEL)) {
         return;
