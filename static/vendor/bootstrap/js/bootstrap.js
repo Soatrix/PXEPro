@@ -135,6 +135,9 @@
         selector = hrefAttr && hrefAttr !== '#' ? hrefAttr.trim() : '';
       }
 
+      // Sanitize the selector to prevent XSS
+      selector = CSS.escape(selector);
+
       try {
         return document.querySelector(selector) ? selector : null;
       } catch (_) {
