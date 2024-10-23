@@ -8,6 +8,12 @@
         </div>
     {% endif %}
 
+    {% if UPDATE_REQUIRED %}
+        <div class="alert alert-warning">
+            <strong>Update Available!</strong><br>Our system shows that the latest release <code>{{ NEW_VERSION }}</code> is available as you are still running <code>{{ CURRENT_VERSION }}</code>.
+        </div>
+    {% endif %}
+
 <!-- Content Row -->
 <div class="row">
 
