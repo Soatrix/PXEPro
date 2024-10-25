@@ -1,0 +1,20 @@
+{% extends "adminpanel/base.html" %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-circle-exclamation"></i> Bugs & Issues</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Bugs & Issues</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    {% if not config.SOATRIX_TOKEN or REAUTH_TOKEN %}
+        {% include "jwt/link.html" %}
+    {% endif %}
+</form>
+{% endblock %}
