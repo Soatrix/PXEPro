@@ -16,7 +16,5 @@
     {% if REAUTH_TOKEN or not config.SOATRIX_TOKEN %}
         {% include "jwt/link.html" %}
     {% endif %}
-    {{ REAUTH_TOKEN }}
-    {{ VALID_TOKEN }}
 </form>
 {% endblock %}
