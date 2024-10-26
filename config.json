@@ -5,5 +5,5 @@
     "TIME_ZONE": "UTC",
     "LANGUAGE_CODE": "en-us",
     "PROJECT_VERSION": "0.0.2-DEV",
-	"ENVIRONMENT": "production"
+	"ENVIRONMENT": "production-snapshot"
 }
