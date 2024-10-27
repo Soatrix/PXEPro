@@ -122,11 +122,7 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-gradient-custom topbar mb-4 static-top shadow">
 
-                    {% if config.activeLicense %}
-                        <h3><span class="badge badge-success">Activated</span></h3>
-                    {% else %}
-                        <h3><span class="badge badge-{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}success{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}warning{% else %}danger{% endif %}">{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}Activated{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}Pending Activation{% else %}Not Activated{% endif %}</span></h3>
-                    {% endif %}
+                    <h3><span class="badge badge-{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}success{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}warning{% else %}danger{% endif %}">{% if config.LICENSE_KEY|license_valid:config.LICENSE_SECRET %}Activated{% elif config.LICENSE_KEY and not config.LICENSE_SECRET %}Pending Activation{% else %}Not Activated{% endif %}</span></h3>
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
