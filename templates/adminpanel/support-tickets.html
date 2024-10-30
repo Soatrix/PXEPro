@@ -4,6 +4,7 @@
     {% csrf_token %}
     <div class="row d-sm-flex align-items-center justify-content-between">
         <div class="col-md-12">
+            {% if not REAUTH_TOKEN and config.SOATRIX_TOKEN %}<a href="{% url 'admin-support-create' %}" class="btn btn-primary float-end">Open Support Ticket</a>{% endif %}
             <h1 class="h3 mb-0 text-dark"><i class="fas fa-hand-holding-medical"></i> Support Tickets</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -13,8 +14,92 @@
             </nav>
         </div>
     </div>
-    {% if not config.SOATRIX_TOKEN %}
+    {% if REAUTH_TOKEN or not config.SOATRIX_TOKEN %}
         {% include "jwt/link.html" %}
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card text-dark mb-3">
+                    <div class="card-header">
+                        <h5 class="card-title text-white float-left">Support Tickets ({{ TICKETS|length }} Total)</h5>
+                    </div>
+                    <table class="table table-borderless {% if user.profile.dark_mode %}table-dark{% else %}table-light{% endif %} table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Created</th>
+                                <th>Last Updated</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in TICKETS %}
+                                <tr>
+                                    <td><a href="{% url 'admin-support-ticket' id=ticket.formatted_id  %}">U{{ ticket.user.id }}-P{{ ticket.user.product }}S{{ ticket.user.support_tier }}-T{{ ticket.id }}</a></td>
+                                    <td>{{ ticket.title }}</td>
+                                    <td><div class="badge badge-secondary">{{ ticket.created_at|date:"D, M d Y" }}</div></td>
+                                    <td><div class="badge badge-secondary">{{ ticket.updated_at|date:"D, M d Y h:iA" }}</div></td>
+                                    <td><div class="badge badge-{% if ticket.priority == 1 %}success{% elif ticket.priority == 2 or ticket.priority == 3 %}warning{% else %}danger{% endif %}">{% if ticket.priority == 1 %}Low{% elif ticket.priority == 2 %}Moderate{% elif ticket.priority == 3 %}High{% else %}Severe{% endif %}</div></td>
+                                    <td><div class="badge badge-{% if ticket.status == "open" or ticket.status == "in_progress" or ticket.status == "resolved" %}success{% elif ticket.status == "reopened" %}warning{% else %}danger{% endif %}">{{ ticket.status|title }}</div></td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <i class="fas fa-ellipsis" type="button" id="dropdownMenu{{ ticket.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu{{ ticket.id }}">
+                                                <a class="dropdown-item" href="{% url 'admin-support-ticket' id=ticket.formatted_id  %}">View Ticket</a>
+                                                {% if ticket.status == "open" or ticket.status == "reopened" or ticket.status == "in_progress" %}
+                                                    <div class="dropdown-divider"></div>
+                                                    <button type="submit" class="dropdown-item danger-hover" name="resolved" value="{{ ticket.id }}">Mark Resolved</button>
+                                                    <button type="button" class="dropdown-item danger-hover ticket-close" id="deleteTicketButton" value="{{ ticket.id }}">Close Ticket</button>
+                                                {% else %}
+                                                    <div class="dropdown-divider"></div>
+                                                    <button type="submit" class="dropdown-item" name="reopen" value="{{ ticket.id }}">Reopen Ticket</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     {% endif %}
+
+    <div class="modal fade" id="deleteTicketModal" tabindex="-1" role="dialog" aria-labelledby="deleteTicketModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-gradient-gray-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteTicketModalLabel">Are You Sure?</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true" style="color: #fff;">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<strong>Please Note:</strong> Once closed, the ticket will no longer be active, but you can reopen it at any time if needed.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Actually, never mind.</button>
+					<button type="submit" name="delete" id="confirmDeleteButton" class="btn btn-danger">Yes, I'm sure.</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </form>
+{% endblock %}
+
+{% block footer_scripts %}
+<script>
+	var ticketsModal = new bootstrap.Modal(document.getElementById('deleteTicketModal'), {
+		keyboard: false
+	});
+	$(".ticket-close").on("click", function(event) {
+		var activeTicket = $(event.target).val();
+		$("#confirmDeleteButton").val(activeTicket);
+		ticketsModal.show();
+	});
+</script>
 {% endblock %}
