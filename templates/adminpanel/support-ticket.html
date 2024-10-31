@@ -19,6 +19,7 @@
         <div class="col-md-8">
             <div class="card mb-3 mr-5">
                 <div class="card-body">{{ TICKET.description }}</div>
+                <div class="card-footer bg-light text-dark p-2">{{ TICKET.user.user }} @ {{ TICKET.created_at|date:"D, M d Y h:iA" }}</div>
             </div>
             <div class="card mb-3 ml-5">
                 <div class="card-body">This is a demo reply.</div>
@@ -30,7 +31,23 @@
                     <h5 class="card-title text-white float-left">Ticket Information</h5>
                 </div>
                 <div class="card-body">
-
+                    <div class="form-group">
+                        <label for="ticket-created">Ticket Opened</label>
+                        <input id="ticket-created" name="ticket-created" class="form-control bg-dark text-white" value="{{ TICKET.created_at|date:"D, M d Y" }}" disabled="disabled"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticket-updated">Ticket Last Updated</label>
+                        <input id="ticket-updated" name="ticket-updated" class="form-control bg-dark text-white" value="{{ TICKET.updated_at|date:"D, M d Y h:iA" }}" disabled="disabled"/>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label for="ticket-status">Ticket Status</label>
+                        <input id="ticket-status" name="ticket-status" class="form-control bg-{% if TICKET.status == "open" or TICKET.status == "in_progress" or TICKET.status == "resolved" %}success{% elif TICKET.status == "reopened" %}warning{% else %}danger{% endif %} text-white" value="{{ TICKET.status|title }}" disabled="disabled"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="ticket-severity">Severity</label>
+                        <input id="ticket-severity" name="ticket-severity" class="form-control bg-{% if TICKET.priority == 1 %}success{% elif TICKET.priority == 2 or TICKET.priority == 3 %}warning{% else %}danger{% endif %} text-white" value="{% if TICKET.priority == 1 %}Low{% elif TICKET.priority == 2 %}Moderate{% elif TICKET.priority == 3 %}High{% else %}Severe{% endif %}" disabled="disabled"/>
+                    </div>
                 </div>
             </div>
         </div>
