@@ -4,7 +4,13 @@
     {% csrf_token %}
     <div class="row d-sm-flex align-items-center justify-content-between">
         <div class="col-md-12">
-            <a href="{% url 'admin-support' %}" class="btn btn-primary float-end"><i class="fas fa-arrow-left-long"></i> Back to Tickets</a>
+            <a href="{% url 'admin-support' %}" class="btn btn-custom-primary ml-2 float-end"><i class="fas fa-arrow-left-long"></i> Back to Tickets</a>
+            {% if TICKET.status != 'closed' and TICKET.status != "resolved" %}
+                <button type="submit" name="close-ticket" value="{{ TICKET.id }}" class="btn btn-danger ml-2 float-end"><i class="fas fa-door-open"></i> Close Ticket</button>
+                <button type="submit" name="mark-resolved" value="{{ TICKET.id }}" class="btn btn-success ml-2 float-end"><i class="fas fa-check"></i> Mark Resolved</button>
+            {% else %}
+                <button type="submit" name="reopen-ticket" value="{{ TICKET.id }}" class="btn btn-success ml-2 float-end"><i class="fas fa-reply-all"></i> Reopen Ticket</button>
+            {% endif %}
             <h1 class="h3 mb-0 text-dark"><i class="fas fa-hand-holding-medical"></i> Support Ticket {{ TICKET.formatted_id }}</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -17,13 +23,33 @@
     </div>
     <div class="row">
         <div class="col-md-8">
-            <div class="card mb-3 mr-5">
-                <div class="card-body">{{ TICKET.description }}</div>
-                <div class="card-footer bg-light text-dark p-2">{{ TICKET.user.user }} @ {{ TICKET.created_at|date:"D, M d Y h:iA" }}</div>
-            </div>
             <div class="card mb-3 ml-5">
-                <div class="card-body">This is a demo reply.</div>
+                <div class="card-body">{{ TICKET.description }}</div>
+                <div class="card-footer {% if request.user.profile.dark_mode %}bg-dark{% else %}bg-light{% endif %} text-dark p-2">{% if TICKET.user.first_name %}{{ TICKET.user.first_name }} {{ TICKET.user.last_name }}{% else %}{{ TICKET.user.username|title }}{% endif %} @ {{ TICKET.created_at|date:"D, M d Y h:iA" }}</div>
             </div>
+            {% for comment in TICKET.comments %}
+                <div class="card mb-3 {% if comment.user == config.SOATRIX_USERID %}ml{% else %}mr{% endif %}-5">
+                    <div class="card-body">{{ comment.content|linebreaks }}</div>
+                    <div class="card-footer {% if request.user.profile.dark_mode %}bg-dark{% else %}bg-light{% endif %} text-dark p-2">{% if comment.first_name %}{{ comment.first_name }} {{ comment.last_name }}{% else %}{{ comment.username|title }}{% endif %} @ {{ comment.created_at|date:"D, M d Y h:iA" }}</div>
+                </div>
+            {% endfor %}
+            {% if TICKET.status != "resolved" and TICKET.status != "closed" %}
+                <div class="card mb-3 ml-5">
+                    <textarea class="card-body form-control" rows="5" name="reply-content" id="reply-content"></textarea>
+                    <div class="card-footer {% if request.user.profile.dark_mode %}bg-dark{% else %}bg-light{% endif %} text-dark p-2">
+                        <!-- Hidden file input -->
+                        <input class="float-left d-none" type="file" id="attach-files" multiple>
+
+                        <!-- Send Reply Button -->
+                        <button class="btn btn-custom-primary btn-sm ml-2 float-right" type="submit" name="reply">Send Reply</button>
+
+                        <!-- Attach Files Button -->
+                        <button class="btn btn-custom-primary btn-sm ml-2 float-right" type="button" onclick="document.getElementById('attach-files').click();">
+                            Attach Files <i class="fas fa-paperclip"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <div class="col-md-4">
             <div class="card text-dark mb-3">
@@ -46,8 +72,28 @@
                     </div>
                     <div class="form-group">
                         <label for="ticket-severity">Severity</label>
-                        <input id="ticket-severity" name="ticket-severity" class="form-control bg-{% if TICKET.priority == 1 %}success{% elif TICKET.priority == 2 or TICKET.priority == 3 %}warning{% else %}danger{% endif %} text-white" value="{% if TICKET.priority == 1 %}Low{% elif TICKET.priority == 2 %}Moderate{% elif TICKET.priority == 3 %}High{% else %}Severe{% endif %}" disabled="disabled"/>
+                        <input id="ticket-severity" name="ticket-severity" class="form-control bg-{% if TICKET.priority == 'low' %}success{% elif TICKET.priority == 'moderate' or TICKET.priority == 'high' %}warning{% else %}danger{% endif %} text-white" value="{{ TICKET.priority|title }}" disabled="disabled"/>
                     </div>
+                </div>
+            </div>
+
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">Attachments</h5>
+                </div>
+                <div class="card-body">
+                    <p>There are no attachments.</p>
+                </div>
+            </div>
+
+            <div class="card text-dark mb-3">
+                <div class="card-header">
+                    <h5 class="card-title text-white float-left">Logs</h5>
+                </div>
+                <div class="card-body">
+                    {% for log in TICKET.logs %}
+                        <p><span class="badge badge-secondary">{{ log.created_at|date:"D, M d Y h:iA" }}</span> {{ log.description }}</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
