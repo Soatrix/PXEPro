@@ -1,6 +1,7 @@
 {
+    "DEBUG": true,
     "SECRET_KEY": "your-secret-key-here",
-    "ALLOWED_HOSTS": [],
+    "ALLOWED_HOSTS": ["*"],
     "CSRF_TRUSTED_ORIGINS": [],
     "TIME_ZONE": "UTC",
     "LANGUAGE_CODE": "en-us",
