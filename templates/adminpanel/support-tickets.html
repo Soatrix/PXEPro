@@ -38,11 +38,11 @@
                         <tbody>
                             {% for ticket in TICKETS %}
                                 <tr>
-                                    <td><a href="{% url 'admin-support-ticket' id=ticket.formatted_id  %}">U{{ ticket.user.id }}-P{{ ticket.user.product }}S{{ ticket.user.support_tier }}-T{{ ticket.id }}</a></td>
+                                    <td><a href="{% url 'admin-support-ticket' id=ticket.formatted_id  %}">U{{ ticket.user.id }}-P{{ ticket.user.product.id }}S{{ ticket.user.support_tier }}-T{{ ticket.id }}</a></td>
                                     <td>{{ ticket.title }}</td>
                                     <td><div class="badge badge-secondary">{{ ticket.created_at|date:"D, M d Y" }}</div></td>
                                     <td><div class="badge badge-secondary">{{ ticket.updated_at|date:"D, M d Y h:iA" }}</div></td>
-                                    <td><div class="badge badge-{% if ticket.priority == 1 %}success{% elif ticket.priority == 2 or ticket.priority == 3 %}warning{% else %}danger{% endif %}">{% if ticket.priority == 1 %}Low{% elif ticket.priority == 2 %}Moderate{% elif ticket.priority == 3 %}High{% else %}Severe{% endif %}</div></td>
+                                    <td><div class="badge badge-{% if ticket.priority == 'low' %}success{% elif ticket.priority == 'moderate' or ticket.priority == 'high' %}warning{% else %}danger{% endif %}">{{ ticket.priority|title }}</div></td>
                                     <td><div class="badge badge-{% if ticket.status == "open" or ticket.status == "in_progress" or ticket.status == "resolved" %}success{% elif ticket.status == "reopened" %}warning{% else %}danger{% endif %}">{{ ticket.status|title }}</div></td>
                                     <td>
                                         <div class="dropdown">
