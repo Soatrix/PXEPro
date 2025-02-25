@@ -109,4 +109,4 @@ jobs:
 
           git add .
           git commit -m "Update APT repository with new PXE Pro .deb" || echo "No changes to commit"
-          git push
+          git push https://github-actions:${{ secrets.TOKEN }}@github.com/Soatrix/PXEPro.git
