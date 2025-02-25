@@ -68,12 +68,32 @@ jobs:
           cat <<EOF > $PKG_NAME-deb/DEBIAN/postinst
           #!/bin/bash
           set -e
+          
+          # Set up permissions for the PXE Pro directory
           chown -R www-data:www-data $INSTALL_DIR
+          
+          # Create virtual environment and install dependencies
           cd $INSTALL_DIR
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          
+          # Clone the iPXE repository and build PXE files
+          git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
+          cd /tmp/ipxe
+
+          # Build the PXE files
+          make bin/undionly.kpxe EMBED=src/pxepro.ipxe
+          make bin/bin-x86_64-efi/ipxe.efi EMBED=src/pxepro.ipxe
+
+          # Ensure TFTP directory exists and move the built files
+          mkdir -p /var/lib/tftpboot/pxepro
+          mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+          mv bin/bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+
+          # Enable and restart the PXE Pro service
           systemctl daemon-reload
           systemctl enable pxepro
           systemctl restart pxepro
@@ -89,28 +109,6 @@ jobs:
         with:
           name: pxepro-deb
           path: pxepro_1.0.0_amd64.deb
-
-      - name: Clone iPXE Repository and Build PXE Files
-        run: |
-          # Clone the iPXE repository
-          git clone https://github.com/ipxe/ipxe.git
-          cd ipxe
-
-          # Copy pxepro.ipxe to the ipxe repository
-          cp ../pxepro.ipxe src/
-
-          # Build the required PXE files
-          make bin/undionly.kpxe EMBED=src/pxepro.ipxe
-          make bin/bin-x86_64-efi/ipxe.efi EMBED=src/pxepro.ipxe
-
-      - name: Move Built PXE Files to TFTP Directory
-        run: |
-          # Ensure TFTP directory exists
-          sudo mkdir -p /var/lib/tftpboot/pxepro
-
-          # Move the built files to /var/lib/tftpboot
-          sudo mv ipxe/bin/undionly.kpxe /var/lib/tftpboot/pxepro/
-          sudo mv ipxe/bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
