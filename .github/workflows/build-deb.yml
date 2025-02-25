@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - snapshot
+
   workflow_dispatch:
 
 jobs:
@@ -41,8 +42,8 @@ jobs:
           Description: PXE Pro - Diskless Boot Solution
           EOF
 
-          # Copy project files
-          cp -r * $PKG_NAME-deb/$INSTALL_DIR
+          # Copy project files, excluding the package directory itself and others that shouldn't be in the .deb
+          rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
 
           # Systemd service file
           cat <<EOF > $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
