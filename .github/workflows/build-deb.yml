@@ -1,0 +1,70 @@
+name: Build and Publish .deb for PXE Pro
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Debian Packaging Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev
+
+      - name: Build Debian Package
+        run: |
+          mkdir -p pxepro-deb/DEBIAN
+          cat <<EOF > pxepro-deb/DEBIAN/control
+          Package: pxepro
+          Version: 1.0.0
+          Architecture: amd64
+          Maintainer: Dan <your-email@example.com>
+          Depends: make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
+          Description: PXE Pro - Network Boot Solution
+          EOF
+
+          mkdir -p pxepro-deb/usr/local/bin
+          cp your_binary_or_script pxepro-deb/usr/local/bin/pxepro
+          chmod +x pxepro-deb/usr/local/bin/pxepro
+
+          dpkg-deb --build pxepro-deb pxepro_1.0.0_amd64.deb
+
+      - name: Upload Package as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pxepro-deb
+          path: pxepro_1.0.0_amd64.deb
+
+      - name: Deploy to GitHub Pages (APT Repository)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+          git clone --depth=1 --branch=gh-pages https://github.com/Soatrix/PXEPro gh-pages
+          cd gh-pages
+
+          # Ensure required directory structure exists
+          mkdir -p dists/stable/main/binary-amd64
+          mkdir -p pool/main/p/pxepro
+
+          # Move .deb package to 'pool'
+          mv ../pxepro_1.0.0_amd64.deb pool/main/p/pxepro/
+
+          # Ensure Packages.gz exists before updating
+          if [ ! -f dists/stable/main/binary-amd64/Packages.gz ]; then
+            touch dists/stable/main/binary-amd64/Packages.gz
+          fi
+
+          # Generate Packages.gz safely
+          dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
+
+          git add .
+          git commit -m "Update APT repository with new PXE Pro .deb" || echo "No changes to commit"
+          git push
