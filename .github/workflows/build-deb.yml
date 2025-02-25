@@ -3,7 +3,7 @@ name: Build and Publish .deb for PXE Pro
 on:
   push:
     branches:
-      - main
+      - snapshot
   workflow_dispatch:
 
 jobs:
