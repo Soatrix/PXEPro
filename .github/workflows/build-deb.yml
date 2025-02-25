@@ -18,7 +18,7 @@ jobs:
       - name: Set up Debian Packaging Tools
         run: |
           sudo apt update
-          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
       - name: Build Debian Package
         run: |
@@ -89,6 +89,28 @@ jobs:
         with:
           name: pxepro-deb
           path: pxepro_1.0.0_amd64.deb
+
+      - name: Clone iPXE Repository and Build PXE Files
+        run: |
+          # Clone the iPXE repository
+          git clone https://github.com/ipxe/ipxe.git
+          cd ipxe
+
+          # Copy pxepro.ipxe to the ipxe repository
+          cp ../pxepro.ipxe src/
+
+          # Build the required PXE files
+          make bin/undionly.kpxe EMBED=src/pxepro.ipxe
+          make bin/bin-x86_64-efi/ipxe.efi EMBED=src/pxepro.ipxe
+
+      - name: Move Built PXE Files to TFTP Directory
+        run: |
+          # Ensure TFTP directory exists
+          sudo mkdir -p /var/lib/tftpboot/pxepro
+
+          # Move the built files to /var/lib/tftpboot
+          sudo mv ipxe/bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+          sudo mv ipxe/bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
