@@ -3,6 +3,7 @@ name: Build and Publish .deb for PXE Pro
 on:
   release:
     types: [created]
+  workflow_dispatch:  # <-- allows manual runs
 
 jobs:
   build-deb:
