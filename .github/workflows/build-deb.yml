@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-deb-snapshot:
+    if: github.event.release.target_commitish == 'snapshot'
     runs-on: ubuntu-latest
 
     steps:
@@ -18,14 +19,11 @@ jobs:
           sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
       - name: Build Debian Package (Snapshot)
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ github.event.release.tag_name }}"
           PKG_NAME="pxepro-snapshot"
           INSTALL_DIR="/var/www/pxepro"
           SERVICE_FILE="/etc/systemd/system/pxepro.service"
-          DEB_NAME="${PKG_NAME}_${VERSION}_amd64.deb"
 
           mkdir -p $PKG_NAME-deb/DEBIAN
           mkdir -p $PKG_NAME-deb/$INSTALL_DIR
@@ -84,17 +82,15 @@ jobs:
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
 
-          dpkg-deb --build $PKG_NAME-deb "$DEB_NAME"
+          dpkg-deb --build $PKG_NAME-deb ${PKG_NAME}_${VERSION}_amd64.deb
 
       - name: Upload Package as Artifact (Snapshot)
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-snapshot
-          path: pxepro-snapshot_*.deb
+          path: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
@@ -104,15 +100,16 @@ jobs:
           mkdir -p dists/stable/main/binary-amd64
           mkdir -p pool/main/p/pxepro
 
-          mv ../pxepro-snapshot_*.deb pool/main/p/pxepro/
+          mv ../pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
 
           git add .
-          git commit -m "Update APT repository with new PXE Pro Snapshot .deb" || echo "No changes to commit"
-          git push https://github-actions:${GITHUB_TOKEN}@github.com/Soatrix/PXEPro.git
-
+          git commit -m "Update APT repo with Snapshot version ${{ github.event.release.tag_name }}" || echo "No changes to commit"
+          git push https://github-actions:${{ secrets.TOKEN }}@github.com/Soatrix/PXEPro.git
 
   build-deb-enterprise:
+    if: github.event.release.target_commitish == 'enterprise'
     runs-on: ubuntu-latest
 
     steps:
@@ -125,14 +122,11 @@ jobs:
           sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
       - name: Build Debian Package (Enterprise)
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ github.event.release.tag_name }}"
           PKG_NAME="pxepro-enterprise"
           INSTALL_DIR="/var/www/pxepro"
           SERVICE_FILE="/etc/systemd/system/pxepro.service"
-          DEB_NAME="${PKG_NAME}_${VERSION}_amd64.deb"
 
           mkdir -p $PKG_NAME-deb/DEBIAN
           mkdir -p $PKG_NAME-deb/$INSTALL_DIR
@@ -191,17 +185,15 @@ jobs:
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
 
-          dpkg-deb --build $PKG_NAME-deb "$DEB_NAME"
+          dpkg-deb --build $PKG_NAME-deb ${PKG_NAME}_${VERSION}_amd64.deb
 
       - name: Upload Package as Artifact (Enterprise)
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-enterprise
-          path: pxepro-enterprise_*.deb
+          path: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
@@ -211,9 +203,10 @@ jobs:
           mkdir -p dists/stable/main/binary-amd64
           mkdir -p pool/main/p/pxepro
 
-          mv ../pxepro-enterprise_*.deb pool/main/p/pxepro/
+          mv ../pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
 
           git add .
-          git commit -m "Update APT repository with new PXE Pro Enterprise .deb" || echo "No changes to commit"
-          git push https://github-actions:${GITHUB_TOKEN}@github.com/Soatrix/PXEPro.git
+          git commit -m "Update APT repo with Enterprise version ${{ github.event.release.tag_name }}" || echo "No changes to commit"
+          git push https://github-actions:${{ secrets.TOKEN }}@github.com/Soatrix/PXEPro.git
