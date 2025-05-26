@@ -1,9 +1,10 @@
-name: Build and Publish .deb for PXE Pro
+name: Build and Publish .deb (Snapshot)
 
 on:
   release:
     types: [created]
-  workflow_dispatch:  # <-- allows manual runs
+    branches:
+      - snapshot
 
 jobs:
   build-deb:
@@ -20,31 +21,11 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
-      - name: Determine Build Context
-        id: context
+      - name: Build Snapshot Debian Package
         run: |
-          BRANCH="${{ github.event.release.target_commitish }}"
           VERSION="${{ github.event.release.tag_name }}"
-          if [[ "$BRANCH" == "snapshot" ]]; then
-            PKG_NAME="pxepro-snapshot"
-            DESCRIPTION="PXE Pro - Diskless Boot Solution (Snapshot Version)"
-          elif [[ "$BRANCH" == "enterprise" ]]; then
-            PKG_NAME="pxepro-enterprise"
-            DESCRIPTION="PXE Pro - Diskless Boot Solution (Enterprise Version)"
-          else
-            echo "Unsupported branch: $BRANCH"
-            exit 1
-          fi
-          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-          echo "pkg_name=$PKG_NAME" >> $GITHUB_OUTPUT
-          echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Build Debian Package
-        run: |
-          PKG_NAME="${{ steps.context.outputs.pkg_name }}"
-          DESCRIPTION="${{ steps.context.outputs.description }}"
-          VERSION="${{ steps.context.outputs.version }}"
+          PKG_NAME="pxepro-snapshot"
+          DESCRIPTION="PXE Pro - Diskless Boot Solution (Snapshot Version)"
           INSTALL_DIR="/var/www/pxepro"
 
           mkdir -p $PKG_NAME-deb/DEBIAN
@@ -115,8 +96,8 @@ jobs:
       - name: Upload .deb Package
         uses: actions/upload-artifact@v4
         with:
-          name: pxepro-deb
-          path: pxepro_${{ steps.context.outputs.version }}_amd64.deb
+          name: pxepro-snapshot-deb
+          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
@@ -128,10 +109,10 @@ jobs:
           mkdir -p dists/stable/main/binary-amd64
           mkdir -p pool/main/p/pxepro
 
-          mv ../pxepro_${{ steps.context.outputs.version }}_amd64.deb pool/main/p/pxepro/
+          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
 
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
 
           git add .
-          git commit -m "Update APT repository with new PXE Pro .deb (v${{ steps.context.outputs.version }})" || echo "No changes to commit"
+          git commit -m "Snapshot: Add .deb v${{ github.event.release.tag_name }}" || echo "No changes to commit"
           git push https://github-actions:${{ secrets.TOKEN }}@github.com/Soatrix/PXEPro.git
