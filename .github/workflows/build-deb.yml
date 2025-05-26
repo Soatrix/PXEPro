@@ -1,0 +1,142 @@
+name: Build and Publish PXE Pro Debian Packages
+
+on:
+  release:
+    types: [created]     # Trigger on new release creation
+  workflow_dispatch:      # Also allow manual trigger
+
+jobs:
+  build-deb-snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Debian Packaging Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
+
+      - name: Build Debian Package (Snapshot)
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-snapshot"
+          INSTALL_DIR="/var/www/pxepro"
+
+          echo "Building snapshot package version $VERSION..."
+
+          # Clean up old package dir if exists
+          rm -rf ${PKG_NAME}-deb
+          mkdir -p ${PKG_NAME}-deb${INSTALL_DIR}
+
+          # Copy files into package folder (adjust paths as needed)
+          cp -r * ${PKG_NAME}-deb${INSTALL_DIR}/
+
+          # Control file
+          mkdir -p ${PKG_NAME}-deb/DEBIAN
+          cat > ${PKG_NAME}-deb/DEBIAN/control <<EOF
+          Package: pxepro-snapshot
+          Version: $VERSION
+          Section: base
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Soatrix <support@soatrix.com>
+          Description: PXE Pro Snapshot Debian package version $VERSION
+          EOF
+
+          # Build the .deb package
+          dpkg-deb --build ${PKG_NAME}-deb pxepro_${VERSION}_amd64.deb
+
+      - name: Upload Snapshot Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pxepro-deb-snapshot
+          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
+
+      - name: Deploy Snapshot Package to GitHub Pages APT Repo
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/Soatrix/PXEPro gh-pages
+          cd gh-pages
+
+          mkdir -p dists/stable/main/binary-amd64
+          mkdir -p pool/main/p/pxepro
+
+          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+
+          dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
+
+          git add .
+          git commit -m "Update APT repo with PXE Pro Snapshot .deb version ${{ github.event.release.tag_name }}" || echo "No changes to commit"
+          git push https://github-actions:${TOKEN}@github.com/Soatrix/PXEPro.git
+
+  build-deb-enterprise:
+    runs-on: ubuntu-latest
+    needs: build-deb-snapshot
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Debian Packaging Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
+
+      - name: Build Debian Package (Enterprise)
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-enterprise"
+          INSTALL_DIR="/var/www/pxepro"
+
+          echo "Building enterprise package version $VERSION..."
+
+          rm -rf ${PKG_NAME}-deb
+          mkdir -p ${PKG_NAME}-deb${INSTALL_DIR}
+
+          cp -r * ${PKG_NAME}-deb${INSTALL_DIR}/
+
+          mkdir -p ${PKG_NAME}-deb/DEBIAN
+          cat > ${PKG_NAME}-deb/DEBIAN/control <<EOF
+          Package: pxepro-enterprise
+          Version: $VERSION
+          Section: base
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Soatrix <support@soatrix.com>
+          Description: PXE Pro Enterprise Debian package version $VERSION
+          EOF
+
+          dpkg-deb --build ${PKG_NAME}-deb pxepro_${VERSION}_amd64.deb
+
+      - name: Upload Enterprise Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pxepro-deb-enterprise
+          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
+
+      - name: Deploy Enterprise Package to GitHub Pages APT Repo
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+
+          git clone --depth=1 --branch=gh-pages https://github.com/Soatrix/PXEPro gh-pages
+          cd gh-pages
+
+          mkdir -p dists/stable/main/binary-amd64
+          mkdir -p pool/main/p/pxepro
+
+          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+
+          dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
+
+          git add .
+          git commit -m "Update APT repo with PXE Pro Enterprise .deb version ${{ github.event.release.tag_name }}" || echo "No changes to commit"
+          git push https://github-actions:${TOKEN}@github.com/Soatrix/PXEPro.git
