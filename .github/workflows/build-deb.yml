@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-snapshot
-          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
+          path: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
@@ -121,7 +121,7 @@ jobs:
           mkdir -p pool/main/p/pxepro
 
           # Move .deb package to 'pool'
-          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+          mv ../pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
 
           # Generate Packages.gz safely
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
@@ -232,7 +232,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-enterprise
-          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
+          path: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
@@ -245,7 +245,7 @@ jobs:
           mkdir -p dists/stable/main/binary-amd64
           mkdir -p pool/main/p/pxepro
 
-          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
+          mv ../pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
 
           # Generate Packages.gz safely
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
