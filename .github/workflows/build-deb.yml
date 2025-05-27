@@ -101,7 +101,7 @@ jobs:
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
 
           # Build .deb package
-          dpkg-deb --build $PKG_NAME-deb pxepro_${VERSION}_amd64.deb
+          dpkg-deb --build $PKG_NAME-deb pxepro-snapshot_${VERSION}_amd64.deb
 
       - name: Upload Package as Artifact (Snapshot)
         uses: actions/upload-artifact@v4
@@ -226,7 +226,7 @@ jobs:
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
 
           # Build .deb package
-          dpkg-deb --build $PKG_NAME-deb pxepro_${VERSION}_amd64.deb
+          dpkg-deb --build $PKG_NAME-deb pxepro-enterprise_${VERSION}_amd64.deb
 
       - name: Upload Package as Artifact (Enterprise)
         uses: actions/upload-artifact@v4
