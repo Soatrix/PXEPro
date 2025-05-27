@@ -89,6 +89,11 @@ jobs:
             mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
             make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
             mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            
+            mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
+            rm -rf /etc/nginx/sites-available/default
+            rm -rf /etc/nginx/sites-enabled/default
+            systemctl restart nginx
 
             systemctl daemon-reload
             systemctl enable pxepro
@@ -188,6 +193,11 @@ jobs:
             mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
             make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
             mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            
+            mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
+            rm -rf /etc/nginx/sites-available/default
+            rm -rf /etc/nginx/sites-enabled/default
+            systemctl restart nginx
 
             systemctl daemon-reload
             systemctl enable pxepro
