@@ -85,10 +85,15 @@ jobs:
             cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
             cd /tmp/ipxe/src
             mkdir -p /var/lib/tftpboot/pxepro
-            make bin/undionly.kpxe EMBED=pxepro.ipxe
-            mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
-            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            if [ ! -f /var/lib/tftpboot/pxepro/undionly.kpxe ]; then
+              make bin/undionly.kpxe EMBED=pxepro.ipxe
+              mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+            fi
+
+            if [ ! -f /var/lib/tftpboot/pxepro/ipxe.efi ]; then
+              make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+              mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            fi
             
             echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
             sudo chmod 440 /etc/sudoers.d/www-data-zfs
@@ -214,10 +219,15 @@ jobs:
             cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
             cd /tmp/ipxe/src
             mkdir -p /var/lib/tftpboot/pxepro
-            make bin/undionly.kpxe EMBED=pxepro.ipxe
-            mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
-            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            if [ ! -f /var/lib/tftpboot/pxepro/undionly.kpxe ]; then
+              make bin/undionly.kpxe EMBED=pxepro.ipxe
+              mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+            fi
+
+            if [ ! -f /var/lib/tftpboot/pxepro/ipxe.efi ]; then
+              make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+              mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            fi
             
             echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
             chmod 440 /etc/sudoers.d/www-data-zfs
