@@ -98,13 +98,15 @@ jobs:
           cd /tmp/ipxe/src
 
           # Build the PXE files
-          make bin/undionly.kpxe EMBED=pxepro.ipxe
-          make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-
-          # Ensure TFTP directory exists and move the built files
           mkdir -p /var/lib/tftpboot/pxepro
-          mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
-          mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+          if [ -d /var/lib/tftpboot/pxepro/undionly.kpxe ]; then
+            make bin/undionly.kpxe EMBED=pxepro.ipxe
+            mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+          fi
+          if [ -d /var/lib/tftpboot/pxepro/ipxe.efi ]; then
+            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+          fi
 
           # Enable and restart the PXE Pro service
           systemctl daemon-reload
@@ -237,13 +239,15 @@ jobs:
           cd /tmp/ipxe/src
 
           # Build the PXE files
-          make bin/undionly.kpxe EMBED=pxepro.ipxe
-          make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-
-          # Ensure TFTP directory exists and move the built files
           mkdir -p /var/lib/tftpboot/pxepro
-          mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
-          mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+          if [ -d /var/lib/tftpboot/pxepro/undionly.kpxe ]; then
+            make bin/undionly.kpxe EMBED=pxepro.ipxe
+            mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
+          fi
+          if [ -d /var/lib/tftpboot/pxepro/ipxe.efi ]; then
+            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+          fi
 
           # Enable and restart the PXE Pro service
           systemctl daemon-reload
