@@ -98,14 +98,27 @@ jobs:
             rm -rf /etc/nginx/sites-enabled/default
             systemctl restart nginx
             
-            # Configure firewall rules
-            ufw allow 22/tcp comment 'SSH Access'
-            ufw allow 67/udp comment 'DHCP (dnsmasq)'
-            ufw allow 69/udp comment 'TFTP (dnsmasq)'
-            ufw allow 4011/udp comment 'ProxyDHCP (dnsmasq)'
-            ufw allow 80/tcp comment 'HTTP Boot (nginx)'
-            ufw allow 3260/tcp comment 'iSCSI (targetcli)'
-            yes | ufw enable
+            # Helper function to safely add UFW rule
+            add_ufw_rule() {
+              local PORT_PROTO="$1"
+              local COMMENT="$2"
+              if ! ufw status | grep -qw "$PORT_PROTO"; then
+                ufw allow "$PORT_PROTO" comment "$COMMENT"
+              fi
+            }
+
+            # Add only missing rules
+            add_ufw_rule "22/tcp" "SSH Access"
+            add_ufw_rule "67/udp" "DHCP (dnsmasq)"
+            add_ufw_rule "69/udp" "TFTP (dnsmasq)"
+            add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
+            add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
+            add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
+
+            # Enable UFW if not already enabled
+            if ! ufw status | grep -q "Status: active"; then
+              yes | ufw enable
+            fi
 
             systemctl daemon-reload
             systemctl enable pxepro
@@ -214,14 +227,27 @@ jobs:
             rm -rf /etc/nginx/sites-enabled/default
             systemctl restart nginx
             
-            # Configure firewall rules
-            ufw allow 22/tcp comment 'SSH Access'
-            ufw allow 67/udp comment 'DHCP (dnsmasq)'
-            ufw allow 69/udp comment 'TFTP (dnsmasq)'
-            ufw allow 4011/udp comment 'ProxyDHCP (dnsmasq)'
-            ufw allow 80/tcp comment 'HTTP Boot (nginx)'
-            ufw allow 3260/tcp comment 'iSCSI (targetcli)'
-            yes | ufw enable
+            # Helper function to safely add UFW rule
+            add_ufw_rule() {
+              local PORT_PROTO="$1"
+              local COMMENT="$2"
+              if ! ufw status | grep -qw "$PORT_PROTO"; then
+                ufw allow "$PORT_PROTO" comment "$COMMENT"
+              fi
+            }
+
+            # Add only missing rules
+            add_ufw_rule "22/tcp" "SSH Access"
+            add_ufw_rule "67/udp" "DHCP (dnsmasq)"
+            add_ufw_rule "69/udp" "TFTP (dnsmasq)"
+            add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
+            add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
+            add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
+
+            # Enable UFW if not already enabled
+            if ! ufw status | grep -q "Status: active"; then
+              yes | ufw enable
+            fi
 
             systemctl daemon-reload
             systemctl enable pxepro
