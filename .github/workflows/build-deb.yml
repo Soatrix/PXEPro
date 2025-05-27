@@ -224,10 +224,8 @@ jobs:
             git config --global user.email "github-actions@github.com"
 
         - name: Clone gh-pages branch
-          env:
-            TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
-            git clone --depth=1 --branch=gh-pages https://$TOKEN@github.com/Soatrix/PXEPro gh-pages
+            git clone --depth=1 --branch=gh-pages https://github.com/Soatrix/PXEPro gh-pages
 
         - name: Download Built Packages
           uses: actions/download-artifact@v4
@@ -244,12 +242,13 @@ jobs:
           run: |
             cd gh-pages
             mkdir -p dists/stable/main/binary-amd64
-            dpkg-scanpackages --arch amd64 pool/main > dists/stable/main/binary-amd64/Packages
-            gzip -kf dists/stable/main/binary-amd64/Packages
+            dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
 
         - name: Commit and Push Changes
+          env:
+            TOKEN: ${{ secrets.TOKEN }}
           run: |
             cd gh-pages
             git add .
-            git commit -m "Update APT repo with new snapshot and enterprise packages"
-            git push origin gh-pages
+            git commit -m "Update APT repository with new Snapshot and Enterprise packages" || echo "No changes to commit"
+            git push https://github-actions:${TOKEN}@github.com/Soatrix/PXEPro.git gh-pages
