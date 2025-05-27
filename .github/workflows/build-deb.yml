@@ -44,6 +44,34 @@ jobs:
           Maintainer: Soatrix <support@soatrix.com>
           Description: PXE Pro Snapshot Debian package version $VERSION
           EOF
+          
+          # Create service file directory
+          mkdir -p ${PKG_NAME}-deb/lib/systemd/system
+
+          # Copy the service file (assumes it's in your repo root)
+          cp pxepro.service ${PKG_NAME}-deb/lib/systemd/system/pxepro.service
+
+          # Create postinst script
+          cat > ${PKG_NAME}-deb/DEBIAN/postinst <<EOF
+          #!/bin/bash
+          set -e
+          systemctl daemon-reexec || true
+          systemctl daemon-reload || true
+          systemctl enable pxepro.service || true
+          systemctl start pxepro.service || true
+          EOF
+
+          # Create prerm script
+          cat > ${PKG_NAME}-deb/DEBIAN/prerm <<EOF
+          #!/bin/bash
+          set -e
+          systemctl stop pxepro.service || true
+          systemctl disable pxepro.service || true
+          EOF
+
+          # Make maintainer scripts executable
+          chmod 755 ${PKG_NAME}-deb/DEBIAN/postinst
+          chmod 755 ${PKG_NAME}-deb/DEBIAN/prerm
 
           # Build the .deb package
           dpkg-deb --build ${PKG_NAME}-deb pxepro_${VERSION}_amd64.deb
@@ -111,7 +139,36 @@ jobs:
           Maintainer: Soatrix <support@soatrix.com>
           Description: PXE Pro Enterprise Debian package version $VERSION
           EOF
+          
+          # Create service file directory
+          mkdir -p ${PKG_NAME}-deb/lib/systemd/system
 
+          # Copy the service file (assumes it's in your repo root)
+          cp pxepro.service ${PKG_NAME}-deb/lib/systemd/system/pxepro.service
+
+          # Create postinst script
+          cat > ${PKG_NAME}-deb/DEBIAN/postinst <<EOF
+          #!/bin/bash
+          set -e
+          systemctl daemon-reexec || true
+          systemctl daemon-reload || true
+          systemctl enable pxepro.service || true
+          systemctl start pxepro.service || true
+          EOF
+
+          # Create prerm script
+          cat > ${PKG_NAME}-deb/DEBIAN/prerm <<EOF
+          #!/bin/bash
+          set -e
+          systemctl stop pxepro.service || true
+          systemctl disable pxepro.service || true
+          EOF
+
+          # Make maintainer scripts executable
+          chmod 755 ${PKG_NAME}-deb/DEBIAN/postinst
+          chmod 755 ${PKG_NAME}-deb/DEBIAN/prerm
+
+          # Build the .deb package
           dpkg-deb --build ${PKG_NAME}-deb pxepro_${VERSION}_amd64.deb
 
       - name: Upload Enterprise Package Artifact
