@@ -97,19 +97,20 @@ jobs:
             rm -rf /etc/nginx/sites-available/default
             rm -rf /etc/nginx/sites-enabled/default
             systemctl restart nginx
-
-            systemctl daemon-reload
-            systemctl enable pxepro
-            systemctl restart pxepro
-            EOF
             
+            # Configure firewall rules
             ufw allow 22/tcp comment 'SSH Access'
             ufw allow 67/udp comment 'DHCP (dnsmasq)'
             ufw allow 69/udp comment 'TFTP (dnsmasq)'
             ufw allow 4011/udp comment 'ProxyDHCP (dnsmasq)'
             ufw allow 80/tcp comment 'HTTP Boot (nginx)'
             ufw allow 3260/tcp comment 'iSCSI (targetcli)'
-            ufw enable
+            yes | ufw enable
+
+            systemctl daemon-reload
+            systemctl enable pxepro
+            systemctl restart pxepro
+            EOF
 
             chmod 755 $PKG_NAME-deb/DEBIAN/postinst
             dpkg-deb --build $PKG_NAME-deb pxepro-snapshot_${VERSION}_amd64.deb
@@ -212,19 +213,20 @@ jobs:
             rm -rf /etc/nginx/sites-available/default
             rm -rf /etc/nginx/sites-enabled/default
             systemctl restart nginx
-
-            systemctl daemon-reload
-            systemctl enable pxepro
-            systemctl restart pxepro
-            EOF
             
+            # Configure firewall rules
             ufw allow 22/tcp comment 'SSH Access'
             ufw allow 67/udp comment 'DHCP (dnsmasq)'
             ufw allow 69/udp comment 'TFTP (dnsmasq)'
             ufw allow 4011/udp comment 'ProxyDHCP (dnsmasq)'
             ufw allow 80/tcp comment 'HTTP Boot (nginx)'
             ufw allow 3260/tcp comment 'iSCSI (targetcli)'
-            ufw enable
+            yes | ufw enable
+
+            systemctl daemon-reload
+            systemctl enable pxepro
+            systemctl restart pxepro
+            EOF
 
             chmod 755 $PKG_NAME-deb/DEBIAN/postinst
             dpkg-deb --build $PKG_NAME-deb pxepro-enterprise_${VERSION}_amd64.deb
