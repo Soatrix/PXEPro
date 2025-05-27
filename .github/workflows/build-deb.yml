@@ -79,7 +79,21 @@ jobs:
           pip install -r requirements.txt
           
           # Clone the iPXE repository and build PXE files
-          git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          if [ -d /tmp/ipxe ]; then
+            if [ -d /tmp/ipxe/.git ]; then
+                echo "Updating existing iPXE repo..."
+                cd /tmp/ipxe
+                git reset --hard
+                git clean -fd
+                git pull origin master
+            else
+                echo "/tmp/ipxe exists but is not a git repo, removing..."
+                rm -rf /tmp/ipxe
+                git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+            fi
+          else
+            git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          fi
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
@@ -204,7 +218,21 @@ jobs:
           pip install -r requirements.txt
           
           # Clone the iPXE repository and build PXE files
-          git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          if [ -d /tmp/ipxe ]; then
+            if [ -d /tmp/ipxe/.git ]; then
+                echo "Updating existing iPXE repo..."
+                cd /tmp/ipxe
+                git reset --hard
+                git clean -fd
+                git pull origin master
+            else
+                echo "/tmp/ipxe exists but is not a git repo, removing..."
+                rm -rf /tmp/ipxe
+                git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+            fi
+          else
+            git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          fi
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
