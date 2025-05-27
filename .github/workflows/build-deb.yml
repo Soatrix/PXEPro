@@ -84,8 +84,8 @@ jobs:
           cd /tmp/ipxe/src
 
           # Build the PXE files
-          make bin/undionly.kpxe EMBED=src/pxepro.ipxe
-          make bin/bin-x86_64-efi/ipxe.efi EMBED=src/pxepro.ipxe
+          make bin/undionly.kpxe EMBED=pxepro.ipxe
+          make bin/bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
 
           # Ensure TFTP directory exists and move the built files
           mkdir -p /var/lib/tftpboot/pxepro
@@ -209,8 +209,8 @@ jobs:
           cd /tmp/ipxe/src
 
           # Build the PXE files
-          make bin/undionly.kpxe EMBED=src/pxepro.ipxe
-          make bin/bin-x86_64-efi/ipxe.efi EMBED=src/pxepro.ipxe
+          make bin/undionly.kpxe EMBED=pxepro.ipxe
+          make bin/bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
 
           # Ensure TFTP directory exists and move the built files
           mkdir -p /var/lib/tftpboot/pxepro
