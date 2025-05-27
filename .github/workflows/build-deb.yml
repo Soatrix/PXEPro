@@ -81,7 +81,7 @@ jobs:
           # Clone the iPXE repository and build PXE files
           git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
-          cd /tmp/ipxe
+          cd /tmp/ipxe/src
 
           # Build the PXE files
           make bin/undionly.kpxe EMBED=src/pxepro.ipxe
@@ -206,7 +206,7 @@ jobs:
           # Clone the iPXE repository and build PXE files
           git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
-          cd /tmp/ipxe
+          cd /tmp/ipxe/src
 
           # Build the PXE files
           make bin/undionly.kpxe EMBED=src/pxepro.ipxe
