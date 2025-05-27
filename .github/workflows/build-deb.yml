@@ -1,10 +1,8 @@
 name: Build and Publish .deb for PXE Pro
 
 on:
-  push:
-    branches:
-      - snapshot
-      - enterprise
+  release:
+    types: [published]
 
   workflow_dispatch:
 
@@ -23,8 +21,8 @@ jobs:
 
       - name: Build Debian Package (Snapshot)
         run: |
-          VERSION="1.0.0"
-          PKG_NAME="pxepro-snapshot"  # Changed for snapshot version
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-snapshot"
           INSTALL_DIR="/var/www/pxepro"
           SERVICE_FILE="/etc/systemd/system/pxepro.service"
 
@@ -109,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-snapshot
-          path: pxepro_1.0.0_amd64.deb
+          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
@@ -123,7 +121,7 @@ jobs:
           mkdir -p pool/main/p/pxepro
 
           # Move .deb package to 'pool'
-          mv ../pxepro_1.0.0_amd64.deb pool/main/p/pxepro/
+          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
 
           # Generate Packages.gz safely
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
@@ -147,8 +145,8 @@ jobs:
 
       - name: Build Debian Package (Enterprise)
         run: |
-          VERSION="1.0.0"
-          PKG_NAME="pxepro-enterprise"  # Changed for enterprise version
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-enterprise"
           INSTALL_DIR="/var/www/pxepro"
           SERVICE_FILE="/etc/systemd/system/pxepro.service"
 
@@ -233,7 +231,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pxepro-deb-enterprise
-          path: pxepro_1.0.0_amd64.deb
+          path: pxepro_${{ github.event.release.tag_name }}_amd64.deb
 
       - name: Deploy to GitHub Pages (APT Repository)
         run: |
@@ -246,8 +244,7 @@ jobs:
           mkdir -p dists/stable/main/binary-amd64
           mkdir -p pool/main/p/pxepro
 
-          # Move .deb package to 'pool'
-          mv ../pxepro_1.0.0_amd64.deb pool/main/p/pxepro/
+          mv ../pxepro_${{ github.event.release.tag_name }}_amd64.deb pool/main/p/pxepro/
 
           # Generate Packages.gz safely
           dpkg-scanpackages --arch amd64 pool/main/p/pxepro /dev/null | gzip -9c > dists/stable/main/binary-amd64/Packages.gz
