@@ -34,7 +34,7 @@ jobs:
             Version: $VERSION
             Architecture: amd64
             Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
-            Depends: make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
+            Depends: sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
             Description: PXE Pro - Diskless Boot Solution (Snapshot Version)
             EOF
 
@@ -90,6 +90,9 @@ jobs:
             make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
             mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
             
+            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
+            sudo chmod 440 /etc/sudoers.d/www-data-zfs
+            
             mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
             rm -rf /etc/nginx/sites-available/default
             rm -rf /etc/nginx/sites-enabled/default
@@ -138,7 +141,7 @@ jobs:
             Version: $VERSION
             Architecture: amd64
             Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
-            Depends: make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
+            Depends: sudo make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
             Description: PXE Pro - Diskless Boot Solution (Enterprise Version)
             EOF
 
@@ -193,6 +196,9 @@ jobs:
             mv bin/undionly.kpxe /var/lib/tftpboot/pxepro/
             make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
             mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/pxepro/
+            
+            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
+            sudo chmod 440 /etc/sudoers.d/www-data-zfs
             
             mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
             rm -rf /etc/nginx/sites-available/default
