@@ -241,4 +241,13 @@ jobs:
         - name: Regenerate Packages.gz
           run: |
             cd gh-pages
-            mkdir -
+            mkdir -p dists/stable/main/binary-amd64
+            dpkg-scanpackages --arch amd64 pool/main > dists/stable/main/binary-amd64/Packages
+            gzip -kf dists/stable/main/binary-amd64/Packages
+
+        - name: Commit and Push Changes
+          run: |
+            cd gh-pages
+            git add .
+            git commit -m "Update APT repo with new snapshot and enterprise packages"
+            git push origin gh-pages
