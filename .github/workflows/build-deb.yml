@@ -87,7 +87,6 @@ jobs:
             if [ ! -d /var/lib/tftpboot ]; then
               mkdir -p /var/lib/tftpboot
             fi
-            chown -R pxepro:pxepro /var/lib/tftpboot
             if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
               make bin/undionly.kpxe EMBED=pxepro.ipxe
               mv bin/undionly.kpxe /var/lib/tftpboot/
@@ -98,7 +97,9 @@ jobs:
               mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
             fi
             
-            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
+            chown -R pxepro:pxepro /var/lib/tftpboot
+            
+            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *, /usr/bin/targetcli *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
             sudo chmod 440 /etc/sudoers.d/www-data-zfs
             
             mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
@@ -221,7 +222,9 @@ jobs:
 
             cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
             cd /tmp/ipxe/src
-            mkdir -p /var/lib/tftpboot
+            if [ ! -d /var/lib/tftpboot ]; then
+              mkdir -p /var/lib/tftpboot
+            fi
             if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
               make bin/undionly.kpxe EMBED=pxepro.ipxe
               mv bin/undionly.kpxe /var/lib/tftpboot/
@@ -232,7 +235,10 @@ jobs:
               mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
             fi
             
-            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
+            chown -R pxepro:pxepro /var/lib/tftpboot
+            
+            
+            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *, /usr/bin/targetcli *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
             chmod 440 /etc/sudoers.d/www-data-zfs
             
             mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
