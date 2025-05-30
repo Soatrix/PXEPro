@@ -84,6 +84,9 @@ jobs:
 
             cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
             cd /tmp/ipxe/src
+            if [ ! -d /var/lib/peboot ]; then
+              mkdir -p /var/lib/peboot
+            fi
             if [ ! -d /var/lib/tftpboot ]; then
               mkdir -p /var/lib/tftpboot
             fi
@@ -222,6 +225,9 @@ jobs:
 
             cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
             cd /tmp/ipxe/src
+            if [ ! -d /var/lib/peboot ]; then
+              mkdir -p /var/lib/peboot
+            fi
             if [ ! -d /var/lib/tftpboot ]; then
               mkdir -p /var/lib/tftpboot
             fi
