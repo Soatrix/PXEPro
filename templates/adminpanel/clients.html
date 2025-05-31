@@ -211,7 +211,7 @@ $(document).ready(function() {
 
 function updateClientStats(clientId) {
     $.ajax({
-        url: '/admin/client/stats/' + clientId + '/',  // Assuming this is the URL for stats
+        url: '/client/stats/' + clientId + '/',  // Assuming this is the URL for stats
         method: 'GET',
         success: function(response) {
             // Update upload speed, download speed, and total speed
