@@ -8,286 +8,302 @@ on:
 
 jobs:
   build-deb-snapshot:
-      runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-        - name: Set up Debian Packaging Tools
-          run: |
-            sudo apt update
-            sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
+      - name: Set up Debian Packaging Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
-        - name: Build Debian Package (Snapshot)
-          run: |
-            VERSION="${{ github.event.release.tag_name }}"
-            PKG_NAME="pxepro-snapshot"
-            INSTALL_DIR="/var/www/pxepro"
+      - name: Build Debian Package (Snapshot)
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-snapshot"
+          INSTALL_DIR="/var/www/pxepro"
 
-            mkdir -p $PKG_NAME-deb/DEBIAN
-            mkdir -p $PKG_NAME-deb/$INSTALL_DIR
-            mkdir -p $PKG_NAME-deb/usr/lib/systemd/system/
+          mkdir -p $PKG_NAME-deb/DEBIAN
+          mkdir -p $PKG_NAME-deb/$INSTALL_DIR
+          mkdir -p $PKG_NAME-deb/usr/lib/systemd/system/
 
-            cat <<EOF > $PKG_NAME-deb/DEBIAN/control
-            Package: $PKG_NAME
-            Version: $VERSION
-            Architecture: amd64
-            Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
-            Depends: ufw, sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
-            Description: PXE Pro - Diskless Boot Solution (Snapshot Version)
-            EOF
+          cat <<EOF > $PKG_NAME-deb/DEBIAN/control
+          Package: $PKG_NAME
+          Version: $VERSION
+          Architecture: amd64
+          Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
+          Depends: ufw, sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux, chntpw, ntfs-3g
+          Description: PXE Pro - Diskless Boot Solution (Snapshot Version)
+          EOF
 
-            rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
+          rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
 
-            cat <<EOF > $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
-            [Unit]
-            Description=PXE Pro Diskless Boot Solution
-            After=network.target
+          cat <<EOF > $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
+          [Unit]
+          Description=PXE Pro Diskless Boot Solution
+          After=network.target
 
-            [Service]
-            User=www-data
-            Group=www-data
-            WorkingDirectory=$INSTALL_DIR
-            ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
-            Restart=always
+          [Service]
+          User=pxepro
+          Group=pxepro
+          WorkingDirectory=$INSTALL_DIR
+          ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
+          Restart=always
 
-            [Install]
-            WantedBy=multi-user.target
-            EOF
+          [Install]
+          WantedBy=multi-user.target
+          EOF
 
-            chmod 644 $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
+          chmod 644 $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
 
-            cat <<EOF > $PKG_NAME-deb/DEBIAN/postinst
-            #!/bin/bash
-            set -e
-            chown -R www-data:www-data $INSTALL_DIR
-            cd $INSTALL_DIR
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
+          cat <<'EOF' > $PKG_NAME-deb/DEBIAN/postinst
+          #!/bin/bash
+          set -e
 
-            if [ -d /tmp/ipxe ]; then
-              if [ -d /tmp/ipxe/.git ]; then
-                cd /tmp/ipxe
-                git reset --hard
-                git clean -fd
-                git pull origin master
-              else
-                rm -rf /tmp/ipxe
-                git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
-              fi
+          INSTALL_DIR="/var/www/pxepro"
+
+          # Create pxepro user and group if not exist
+          if ! id -u pxepro >/dev/null 2>&1; then
+            useradd -r -s /bin/bash -d $INSTALL_DIR -m -U pxepro
+          fi
+
+          # Set ownership
+          chown -R pxepro:pxepro $INSTALL_DIR
+
+          # Create venv and install Python deps
+          cd $INSTALL_DIR
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+          # iPXE build
+          if [ -d /tmp/ipxe ]; then
+            if [ -d /tmp/ipxe/.git ]; then
+              cd /tmp/ipxe
+              git reset --hard
+              git clean -fd
+              git pull origin master
             else
+              rm -rf /tmp/ipxe
               git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
             fi
+          else
+            git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          fi
 
-            cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
-            cd /tmp/ipxe/src
-            if [ ! -d /var/lib/peboot ]; then
-              mkdir -p /var/lib/peboot
+          cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
+          cd /tmp/ipxe/src
+
+          mkdir -p /var/lib/peboot /var/lib/tftpboot
+
+          if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
+            make bin/undionly.kpxe EMBED=pxepro.ipxe
+            mv bin/undionly.kpxe /var/lib/tftpboot/
+          fi
+
+          if [ ! -f /var/lib/tftpboot/ipxe.efi ]; then
+            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
+          fi
+
+          chown -R pxepro:pxepro /var/lib/tftpboot
+
+          # Give pxepro user passwordless sudo for key commands
+          echo "pxepro ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/pxepro        
+          chmod 440 /etc/sudoers.d/pxepro
+
+          # Configure NGINX
+          mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
+          rm -rf /etc/nginx/sites-available/default
+          rm -rf /etc/nginx/sites-enabled/default
+          systemctl restart nginx
+
+          # Helper to safely add UFW rule
+          add_ufw_rule() {
+            local PORT_PROTO="$1"
+            local COMMENT="$2"
+            if ! ufw status | grep -qw "$PORT_PROTO"; then
+              ufw allow "$PORT_PROTO" comment "$COMMENT"
             fi
-            if [ ! -d /var/lib/tftpboot ]; then
-              mkdir -p /var/lib/tftpboot
-            fi
-            if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
-              make bin/undionly.kpxe EMBED=pxepro.ipxe
-              mv bin/undionly.kpxe /var/lib/tftpboot/
-            fi
+          }
 
-            if [ ! -f /var/lib/tftpboot/ipxe.efi ]; then
-              make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-              mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
-            fi
-            
-            chown -R pxepro:pxepro /var/lib/tftpboot
-            
-            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *, /usr/bin/targetcli *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
-            sudo chmod 440 /etc/sudoers.d/www-data-zfs
-            
-            mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
-            rm -rf /etc/nginx/sites-available/default
-            rm -rf /etc/nginx/sites-enabled/default
-            systemctl restart nginx
-            
-            # Helper function to safely add UFW rule
-            add_ufw_rule() {
-              local PORT_PROTO="$1"
-              local COMMENT="$2"
-              if ! ufw status | grep -qw "$PORT_PROTO"; then
-                ufw allow "$PORT_PROTO" comment "$COMMENT"
-              fi
-            }
+          add_ufw_rule "22/tcp" "SSH Access"
+          add_ufw_rule "67/udp" "DHCP (dnsmasq)"
+          add_ufw_rule "69/udp" "TFTP (dnsmasq)"
+          add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
+          add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
+          add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
 
-            # Add only missing rules
-            add_ufw_rule "22/tcp" "SSH Access"
-            add_ufw_rule "67/udp" "DHCP (dnsmasq)"
-            add_ufw_rule "69/udp" "TFTP (dnsmasq)"
-            add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
-            add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
-            add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
+          if ! ufw status | grep -q "Status: active"; then
+            yes | ufw enable
+          fi
 
-            # Enable UFW if not already enabled
-            if ! ufw status | grep -q "Status: active"; then
-              yes | ufw enable
-            fi
+          systemctl daemon-reload
+          systemctl enable pxepro
+          systemctl restart pxepro
+          EOF
 
-            systemctl daemon-reload
-            systemctl enable pxepro
-            systemctl restart pxepro
-            EOF
+          chmod 755 $PKG_NAME-deb/DEBIAN/postinst
+          dpkg-deb --build $PKG_NAME-deb pxepro-snapshot_${VERSION}_amd64.deb
 
-            chmod 755 $PKG_NAME-deb/DEBIAN/postinst
-            dpkg-deb --build $PKG_NAME-deb pxepro-snapshot_${VERSION}_amd64.deb
-
-        - name: Upload Package as Artifact (Snapshot)
-          uses: actions/upload-artifact@v4
-          with:
-            name: pxepro-deb-snapshot
-            path: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
-
+      - name: Upload Package as Artifact (Snapshot)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pxepro-deb-snapshot
+          path: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
 
   build-deb-enterprise:
-      runs-on: ubuntu-latest
-      needs: build-deb-snapshot
+    runs-on: ubuntu-latest
+    needs: build-deb-snapshot
 
-      steps:
-        - name: Checkout Repository
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-        - name: Set up Debian Packaging Tools
-          run: |
-            sudo apt update
-            sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
+      - name: Set up Debian Packaging Tools
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential devscripts debhelper dpkg-dev python3-venv git
 
-        - name: Build Debian Package (Enterprise)
-          run: |
-            VERSION="${{ github.event.release.tag_name }}"
-            PKG_NAME="pxepro-enterprise"
-            INSTALL_DIR="/var/www/pxepro"
+      - name: Build Debian Package (enterprise)
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          PKG_NAME="pxepro-enterprise"
+          INSTALL_DIR="/var/www/pxepro"
 
-            mkdir -p $PKG_NAME-deb/DEBIAN
-            mkdir -p $PKG_NAME-deb/$INSTALL_DIR
-            mkdir -p $PKG_NAME-deb/usr/lib/systemd/system/
+          mkdir -p $PKG_NAME-deb/DEBIAN
+          mkdir -p $PKG_NAME-deb/$INSTALL_DIR
+          mkdir -p $PKG_NAME-deb/usr/lib/systemd/system/
 
-            cat <<EOF > $PKG_NAME-deb/DEBIAN/control
-            Package: $PKG_NAME
-            Version: $VERSION
-            Architecture: amd64
-            Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
-            Depends: ufw, sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux
-            Description: PXE Pro - Diskless Boot Solution (Enterprise Version)
-            EOF
+          cat <<EOF > $PKG_NAME-deb/DEBIAN/control
+          Package: $PKG_NAME
+          Version: $VERSION
+          Architecture: amd64
+          Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
+          Depends: ufw, sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux, chntpw, ntfs-3g
+          Description: PXE Pro - Diskless Boot Solution (enterprise Version)
+          EOF
 
-            rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
+          rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
 
-            cat <<EOF > $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
-            [Unit]
-            Description=PXE Pro Diskless Boot Solution
-            After=network.target
+          cat <<EOF > $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
+          [Unit]
+          Description=PXE Pro Diskless Boot Solution
+          After=network.target
 
-            [Service]
-            User=www-data
-            Group=www-data
-            WorkingDirectory=$INSTALL_DIR
-            ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
-            Restart=always
+          [Service]
+          User=pxepro
+          Group=pxepro
+          WorkingDirectory=$INSTALL_DIR
+          ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
+          Restart=always
 
-            [Install]
-            WantedBy=multi-user.target
-            EOF
+          [Install]
+          WantedBy=multi-user.target
+          EOF
 
-            chmod 644 $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
+          chmod 644 $PKG_NAME-deb/usr/lib/systemd/system/pxepro.service
 
-            cat <<EOF > $PKG_NAME-deb/DEBIAN/postinst
-            #!/bin/bash
-            set -e
-            chown -R www-data:www-data $INSTALL_DIR
-            cd $INSTALL_DIR
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
+          cat <<'EOF' > $PKG_NAME-deb/DEBIAN/postinst
+          #!/bin/bash
+          set -e
 
-            if [ -d /tmp/ipxe ]; then
-              if [ -d /tmp/ipxe/.git ]; then
-                cd /tmp/ipxe
-                git reset --hard
-                git clean -fd
-                git pull origin master
-              else
-                rm -rf /tmp/ipxe
-                git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
-              fi
+          INSTALL_DIR="/var/www/pxepro"
+
+          # Create pxepro user and group if not exist
+          if ! id -u pxepro >/dev/null 2>&1; then
+            useradd -r -s /bin/bash -d $INSTALL_DIR -m -U pxepro
+          fi
+
+          # Set ownership
+          chown -R pxepro:pxepro $INSTALL_DIR
+
+          # Create venv and install Python deps
+          cd $INSTALL_DIR
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+          # iPXE build
+          if [ -d /tmp/ipxe ]; then
+            if [ -d /tmp/ipxe/.git ]; then
+              cd /tmp/ipxe
+              git reset --hard
+              git clean -fd
+              git pull origin master
             else
+              rm -rf /tmp/ipxe
               git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
             fi
+          else
+            git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          fi
 
-            cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
-            cd /tmp/ipxe/src
-            if [ ! -d /var/lib/peboot ]; then
-              mkdir -p /var/lib/peboot
+          cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
+          cd /tmp/ipxe/src
+
+          mkdir -p /var/lib/peboot /var/lib/tftpboot
+
+          if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
+            make bin/undionly.kpxe EMBED=pxepro.ipxe
+            mv bin/undionly.kpxe /var/lib/tftpboot/
+          fi
+
+          if [ ! -f /var/lib/tftpboot/ipxe.efi ]; then
+            make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
+            mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
+          fi
+
+          chown -R pxepro:pxepro /var/lib/tftpboot
+
+          # Give pxepro user passwordless sudo for key commands
+          echo "pxepro ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/pxepro        
+          chmod 440 /etc/sudoers.d/pxepro
+
+          # Configure NGINX
+          mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
+          rm -rf /etc/nginx/sites-available/default
+          rm -rf /etc/nginx/sites-enabled/default
+          systemctl restart nginx
+
+          # Helper to safely add UFW rule
+          add_ufw_rule() {
+            local PORT_PROTO="$1"
+            local COMMENT="$2"
+            if ! ufw status | grep -qw "$PORT_PROTO"; then
+              ufw allow "$PORT_PROTO" comment "$COMMENT"
             fi
-            if [ ! -d /var/lib/tftpboot ]; then
-              mkdir -p /var/lib/tftpboot
-            fi
-            if [ ! -f /var/lib/tftpboot/undionly.kpxe ]; then
-              make bin/undionly.kpxe EMBED=pxepro.ipxe
-              mv bin/undionly.kpxe /var/lib/tftpboot/
-            fi
+          }
 
-            if [ ! -f /var/lib/tftpboot/ipxe.efi ]; then
-              make bin-x86_64-efi/ipxe.efi EMBED=pxepro.ipxe
-              mv bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
-            fi
-            
-            chown -R pxepro:pxepro /var/lib/tftpboot
-            
-            
-            echo "www-data ALL=(ALL) NOPASSWD: /sbin/zfs *, /sbin/zpool *, /usr/sbin/zfs *, /usr/sbin/zpool *, /usr/sbin/blockdev *, /usr/bin/targetcli *" | sudo tee /etc/sudoers.d/www-data-zfs > /dev/null
-            chmod 440 /etc/sudoers.d/www-data-zfs
-            
-            mv $INSTALL_DIR/pxepro.conf /etc/nginx/conf.d/
-            rm -rf /etc/nginx/sites-available/default
-            rm -rf /etc/nginx/sites-enabled/default
-            systemctl restart nginx
-            
-            # Helper function to safely add UFW rule
-            add_ufw_rule() {
-              local PORT_PROTO="$1"
-              local COMMENT="$2"
-              if ! ufw status | grep -qw "$PORT_PROTO"; then
-                ufw allow "$PORT_PROTO" comment "$COMMENT"
-              fi
-            }
+          add_ufw_rule "22/tcp" "SSH Access"
+          add_ufw_rule "67/udp" "DHCP (dnsmasq)"
+          add_ufw_rule "69/udp" "TFTP (dnsmasq)"
+          add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
+          add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
+          add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
 
-            # Add only missing rules
-            add_ufw_rule "22/tcp" "SSH Access"
-            add_ufw_rule "67/udp" "DHCP (dnsmasq)"
-            add_ufw_rule "69/udp" "TFTP (dnsmasq)"
-            add_ufw_rule "4011/udp" "ProxyDHCP (dnsmasq)"
-            add_ufw_rule "80/tcp" "HTTP Boot (nginx)"
-            add_ufw_rule "3260/tcp" "iSCSI (targetcli)"
+          if ! ufw status | grep -q "Status: active"; then
+            yes | ufw enable
+          fi
 
-            # Enable UFW if not already enabled
-            if ! ufw status | grep -q "Status: active"; then
-              yes | ufw enable
-            fi
+          systemctl daemon-reload
+          systemctl enable pxepro
+          systemctl restart pxepro
+          EOF
 
-            systemctl daemon-reload
-            systemctl enable pxepro
-            systemctl restart pxepro
-            EOF
+          chmod 755 $PKG_NAME-deb/DEBIAN/postinst
+          dpkg-deb --build $PKG_NAME-deb pxepro-enterprise_${VERSION}_amd64.deb
 
-            chmod 755 $PKG_NAME-deb/DEBIAN/postinst
-            dpkg-deb --build $PKG_NAME-deb pxepro-enterprise_${VERSION}_amd64.deb
-
-        - name: Upload Package as Artifact (Enterprise)
-          uses: actions/upload-artifact@v4
-          with:
-            name: pxepro-deb-enterprise
-            path: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
-
+      - name: Upload Package as Artifact (enterprise)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pxepro-deb-enterprise
+          path: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
+          
   deploy-apt-repo:
       runs-on: ubuntu-latest
       needs: [build-deb-snapshot, build-deb-enterprise]
