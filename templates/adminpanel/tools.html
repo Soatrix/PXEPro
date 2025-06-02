@@ -1,0 +1,49 @@
+{% extends "adminpanel/base.html" %}
+{% load pxefilters %}
+{% block page_content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="row d-sm-flex align-items-center justify-content-between">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-dark"><i class="fas fa-screwdriver-wrench"></i> Tools & Features</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard-home' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'admin-settings' %}">Settings</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Tools & Utilities</li>
+                </ol>
+            </nav>
+        </div>
+        <p><strong>Please Note:</strong> These features are experimental and may have unidentified problems or bugs. Use of these features is at the complete risk and responsibility of the administrator.</p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+            <table class="table table-light table-hover table-borderless">
+                <thead>
+                    <tr>
+                        <th scope="col">Tool</th>
+                        <th scope="col">Description</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <figure>
+                              <blockquote class="blockquote">
+                                <p>Disk Reset Tool</p>
+                              </blockquote>
+                                <figcaption class="blockquote-footer"><span class="text-danger text-uppercase">Use With Caution</span></figcaption>
+                            </figure></td>
+                        <td>Helps when you need to quickly wipe the base data of a disk or drive for it to show up in the pool creation dropdown.</td>
+                        <td><a href="#" class="btn btn-primary">Reset Disk</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
