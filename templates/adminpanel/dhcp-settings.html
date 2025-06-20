@@ -93,6 +93,14 @@
                         <label for="dhcp_max_range">DHCP Address Range Max.</label>
                         <input class="form-control {% if not config.ENABLE_DHCP_SERVER %}bg-dark{% endif %}" name="dhcp_max_range" id="dhcp_max_range" {% if config.ENABLE_DHCP_SERVER %}value="{{ config.DHCP_MAX_RANGE }}" placeholder="DHCP Address Max. Range"{% endif %} {% if not config.ENABLE_DHCP_SERVER %}disabled="disabled"{% endif %}/>
                     </div>
+                    <div class="form-group">
+                        <label for="dhcp_netmask">DHCP Netmask</label>
+                        <input class="form-control {% if not config.ENABLE_DHCP_SERVER %}bg-dark{% endif %}" name="dhcp_netmask" id="dhcp_netmask" {% if config.ENABLE_DHCP_SERVER %}value="{{ config.DHCP_NETMASK }}" placeholder="DHCP Netmask"{% endif %} {% if not config.ENABLE_DHCP_SERVER %}disabled="disabled"{% endif %}/>
+                    </div>
+                    <div class="form-group">
+                        <label for="dhcp_leasetime">DHCP Lease Time</label>
+                        <input class="form-control {% if not config.ENABLE_DHCP_SERVER %}bg-dark{% endif %}" name="dhcp_leasetime" id="dhcp_leasetime" {% if config.ENABLE_DHCP_SERVER %}value="{{ config.DHCP_LEASETIME }}" placeholder="DHCP Lease Time"{% endif %} {% if not config.ENABLE_DHCP_SERVER %}disabled="disabled"{% endif %}/>
+                    </div>
                 </div>
             </div>
         </div>
