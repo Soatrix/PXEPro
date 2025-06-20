@@ -108,3 +108,38 @@
     </div>
 </form>
 {% endblock %}
+
+{% block footer_scripts %}
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dhcpCheckbox = document.getElementById('enable_dhcp_server');
+    const dhcpInputs = [
+        'dhcp_min_range',
+        'dhcp_max_range',
+        'dhcp_netmask',
+        'dhcp_leasetime'
+    ];
+
+    function toggleDhcpInputs() {
+        const enabled = dhcpCheckbox.checked;
+        dhcpInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.disabled = !enabled;
+                if (!enabled) {
+                    el.classList.add('bg-dark');
+                } else {
+                    el.classList.remove('bg-dark');
+                }
+            }
+        });
+    }
+
+    // Run on page load
+    toggleDhcpInputs();
+
+    // Run on checkbox toggle
+    dhcpCheckbox.addEventListener('change', toggleDhcpInputs);
+});
+</script>
+{% endblock %}
