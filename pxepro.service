@@ -3,8 +3,8 @@ Description=PXE Pro Diskless Boot Solution
 After=network.target
 
 [Service]
-User=www-data
-Group=www-data
+User=pxepro
+Group=pxepro
 WorkingDirectory=/var/www/pxepro
 ExecStart=/var/www/pxepro/venv/bin/waitress-serve --unix-socket=/var/www/pxepro/server.sock app.wsgi:application
 
