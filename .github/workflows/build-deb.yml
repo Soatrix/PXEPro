@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: snapshot
 
       - name: Set up Debian Packaging Tools
         run: |
@@ -82,9 +84,9 @@ jobs:
           pip install -r requirements.txt
           
           # Apply migrations and create default superuser
-          $INSTALL_DIR/venv/bin/python <<EOF
+          $INSTALL_DIR/venv/bin/python <<PYTHON_EOF
           import os
-          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
+          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
 
           import django
           from django.core.management import call_command
@@ -100,7 +102,7 @@ jobs:
 
           if not User.objects.filter(username="pxepro").exists():
               User.objects.create_superuser("pxepro", "pxepro@localhost", "disklessboot")
-          EOF
+          PYTHON_EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
@@ -117,6 +119,7 @@ jobs:
             git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           fi
 
+          ls -l $INSTALL_DIR
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
@@ -200,6 +203,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: enterprise
 
       - name: Set up Debian Packaging Tools
         run: |
@@ -268,9 +273,9 @@ jobs:
           pip install -r requirements.txt
 
           # Apply migrations and create default superuser
-          $INSTALL_DIR/venv/bin/python <<EOF
+          $INSTALL_DIR/venv/bin/python <<PYTHON_EOF
           import os
-          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
+          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings")
 
           import django
           from django.core.management import call_command
@@ -286,7 +291,7 @@ jobs:
 
           if not User.objects.filter(username="pxepro").exists():
               User.objects.create_superuser("pxepro", "pxepro@localhost", "fireport")
-          EOF
+          PYTHON_EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
@@ -303,6 +308,7 @@ jobs:
             git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           fi
 
+          ls -l $INSTALL_DIR
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
