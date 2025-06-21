@@ -74,12 +74,33 @@ jobs:
           # Set ownership
           chown -R pxepro:pxepro $INSTALL_DIR
 
-          # Create venv and install Python deps
+          # Create venv and install Python deps# Create venv and install Python deps
           cd $INSTALL_DIR
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          
+          # Apply migrations and create default superuser
+          $INSTALL_DIR/venv/bin/python <<EOF
+          import os
+          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
+
+          import django
+          from django.core.management import call_command
+
+          django.setup()
+
+          # Run migrations
+          call_command("migrate", interactive=False)
+
+          # Create default superuser if it doesn't exist
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+
+          if not User.objects.filter(username="pxepro").exists():
+              User.objects.create_superuser("pxepro", "pxepro@localhost", "disklessboot")
+          EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
@@ -245,6 +266,27 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+
+          # Apply migrations and create default superuser
+          $INSTALL_DIR/venv/bin/python <<EOF
+          import os
+          os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
+
+          import django
+          from django.core.management import call_command
+
+          django.setup()
+
+          # Run migrations
+          call_command("migrate", interactive=False)
+
+          # Create default superuser if it doesn't exist
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+
+          if not User.objects.filter(username="pxepro").exists():
+              User.objects.create_superuser("pxepro", "pxepro@localhost", "fireport")
+          EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
