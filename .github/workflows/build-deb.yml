@@ -117,6 +117,7 @@ jobs:
             git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           fi
 
+          ls -l $INSTALL_DIR
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
@@ -303,6 +304,7 @@ jobs:
             git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
           fi
 
+          ls -l $INSTALL_DIR
           cp $INSTALL_DIR/pxepro.ipxe /tmp/ipxe/src/
           cd /tmp/ipxe/src
 
