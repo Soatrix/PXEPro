@@ -198,11 +198,14 @@ jobs:
           
       - name: Upload Snapshot Package as Release Asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
           asset_name: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
           asset_content_type: application/octet-stream
+
 
 
   build-deb-enterprise:
@@ -392,6 +395,8 @@ jobs:
           
       - name: Upload Enterprise Package as Release Asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
