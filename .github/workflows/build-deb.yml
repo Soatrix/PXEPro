@@ -29,6 +29,7 @@ jobs:
           mkdir -p $PKG_NAME-deb/$INSTALL_DIR
           mkdir -p $PKG_NAME-deb/usr/lib/systemd/system/
 
+
           cat <<EOF > $PKG_NAME-deb/DEBIAN/control
           Package: $PKG_NAME
           Version: $VERSION
@@ -50,6 +51,7 @@ jobs:
           Group=pxepro
           WorkingDirectory=$INSTALL_DIR
           ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
+          ExecStartPost=/bin/chmod 660 $INSTALL_DIR/server.sock
           Restart=always
 
           [Install]
@@ -140,10 +142,25 @@ jobs:
           if ! ufw status | grep -q "Status: active"; then
             yes | ufw enable
           fi
+          
+          usermod -aG www-data pxepro
+          usermod -aG pxepro www-data
+          
+          mkdir -p /run/pxepro
+          chown pxepro:www-data /run/pxepro
+          chmod 770 /run/pxepro
 
           systemctl daemon-reload
+          systemctl enable nginx --now
+          systemctl enable dnsmasq --now
           systemctl enable pxepro
           systemctl restart pxepro
+          
+          chown pxepro:www-data /run/pxepro/server.sock
+          chmod 660 /run/pxepro/server.sock
+          
+          chown -R www-data:www-data $INSTALL_DIR
+          
           EOF
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
@@ -184,7 +201,7 @@ jobs:
           Architecture: amd64
           Maintainer: Soatrix NZ Ltd. <contact@soatrix.com>
           Depends: ufw, sudo, make, unzip, git, gcc, binutils, zlib1g-dev, genisoimage, liblzma-dev, dnsmasq, python3-dev, python3-venv, targetcli-fb, nginx, zfsutils-linux, chntpw, ntfs-3g
-          Description: PXE Pro - Diskless Boot Solution (enterprise Version)
+          Description: PXE Pro - Diskless Boot Solution (Enterprise Version)
           EOF
 
           rsync -a --exclude=$PKG_NAME-deb --exclude=.git --exclude=.github --exclude=node_modules ./ $PKG_NAME-deb/$INSTALL_DIR/
@@ -199,6 +216,7 @@ jobs:
           Group=pxepro
           WorkingDirectory=$INSTALL_DIR
           ExecStart=$INSTALL_DIR/venv/bin/waitress-serve --unix-socket=$INSTALL_DIR/server.sock app.wsgi:application
+          ExecStartPost=/bin/chmod 660 $INSTALL_DIR/server.sock
           Restart=always
 
           [Install]
@@ -289,10 +307,21 @@ jobs:
           if ! ufw status | grep -q "Status: active"; then
             yes | ufw enable
           fi
+          
+          usermod -aG www-data pxepro
+          usermod -aG pxepro www-data
 
           systemctl daemon-reload
+          systemctl enable nginx --now
+          systemctl enable dnsmasq --now
           systemctl enable pxepro
           systemctl restart pxepro
+          
+          chown pxepro:www-data /run/pxepro/server.sock
+          chmod 660 /run/pxepro/server.sock
+          
+          chown -R www-data:www-data $INSTALL_DIR
+          
           EOF
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
