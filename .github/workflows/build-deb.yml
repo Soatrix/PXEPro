@@ -195,6 +195,15 @@ jobs:
         with:
           name: pxepro-deb-snapshot
           path: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
+          
+      - name: Upload Snapshot Package as Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
+          asset_name: pxepro-snapshot_${{ github.event.release.tag_name }}_amd64.deb
+          asset_content_type: application/octet-stream
+
 
   build-deb-enterprise:
     runs-on: ubuntu-latest
@@ -380,6 +389,14 @@ jobs:
         with:
           name: pxepro-deb-enterprise
           path: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
+          
+      - name: Upload Enterprise Package as Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
+          asset_name: pxepro-enterprise_${{ github.event.release.tag_name }}_amd64.deb
+          asset_content_type: application/octet-stream
           
   deploy-apt-repo:
       runs-on: ubuntu-latest
