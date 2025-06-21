@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: snapshot
 
       - name: Set up Debian Packaging Tools
         run: |
@@ -201,6 +203,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: enterprise
 
       - name: Set up Debian Packaging Tools
         run: |
