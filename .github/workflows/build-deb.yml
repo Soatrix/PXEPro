@@ -82,7 +82,7 @@ jobs:
           pip install -r requirements.txt
           
           # Apply migrations and create default superuser
-          $INSTALL_DIR/venv/bin/python <<EOF
+          $INSTALL_DIR/venv/bin/python <<PYTHON_EOF
           import os
           os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
 
@@ -100,7 +100,7 @@ jobs:
 
           if not User.objects.filter(username="pxepro").exists():
               User.objects.create_superuser("pxepro", "pxepro@localhost", "disklessboot")
-          EOF
+          PYTHON_EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
@@ -269,7 +269,7 @@ jobs:
           pip install -r requirements.txt
 
           # Apply migrations and create default superuser
-          $INSTALL_DIR/venv/bin/python <<EOF
+          $INSTALL_DIR/venv/bin/python <<PYTHON_EOF
           import os
           os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pxepro.settings")
 
@@ -287,7 +287,7 @@ jobs:
 
           if not User.objects.filter(username="pxepro").exists():
               User.objects.create_superuser("pxepro", "pxepro@localhost", "fireport")
-          EOF
+          PYTHON_EOF
 
           # iPXE build
           if [ -d /tmp/ipxe ]; then
