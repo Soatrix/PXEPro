@@ -142,8 +142,13 @@ jobs:
           fi
 
           systemctl daemon-reload
+          systemctl enable nginx --now
+          systemctl enable dnsmasq --now
           systemctl enable pxepro
           systemctl restart pxepro
+          
+          chown -R www-data:www-data $INSTALL_DIR
+          
           EOF
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
@@ -291,8 +296,13 @@ jobs:
           fi
 
           systemctl daemon-reload
+          systemctl enable nginx --now
+          systemctl enable dnsmasq --now
           systemctl enable pxepro
           systemctl restart pxepro
+          
+          chown -R www-data:www-data $INSTALL_DIR
+          
           EOF
 
           chmod 755 $PKG_NAME-deb/DEBIAN/postinst
