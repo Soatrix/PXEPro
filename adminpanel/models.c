@@ -2246,7 +2246,6 @@ static const char __pyx_k_user[] = "user";
 static const char __pyx_k_Model[] = "Model";
 static const char __pyx_k_Theme[] = "Theme";
 static const char __pyx_k_blank[] = "blank";
-static const char __pyx_k_panel[] = "panel";
 static const char __pyx_k_super[] = "super";
 static const char __pyx_k_theme[] = "theme";
 static const char __pyx_k_title[] = "title";
@@ -2285,6 +2284,7 @@ static const char __pyx_k_on_delete[] = "on_delete";
 static const char __pyx_k_ForeignKey[] = "ForeignKey";
 static const char __pyx_k_Theme_Meta[] = "Theme.Meta";
 static const char __pyx_k_Theme_save[] = "Theme.save";
+static const char __pyx_k_adminpanel[] = "adminpanel";
 static const char __pyx_k_max_length[] = "max_length";
 static const char __pyx_k_Theme___str[] = "Theme.__str__";
 static const char __pyx_k_UserProfile[] = "UserProfile";
@@ -2411,41 +2411,41 @@ static __pyx_mstatetype * const __pyx_mstate_global = &__pyx_mstate_global_stati
 #define __pyx_n_u_UserProfile_Meta __pyx_string_tab[17]
 #define __pyx_n_u_UserProfile___str __pyx_string_tab[18]
 #define __pyx_kp_u__2 __pyx_string_tab[19]
-#define __pyx_n_u_app_label __pyx_string_tab[20]
-#define __pyx_n_u_args __pyx_string_tab[21]
-#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[22]
-#define __pyx_n_u_blank __pyx_string_tab[23]
-#define __pyx_n_u_cline_in_traceback __pyx_string_tab[24]
-#define __pyx_n_u_create __pyx_string_tab[25]
-#define __pyx_n_u_create_default_theme __pyx_string_tab[26]
-#define __pyx_n_u_dark_css __pyx_string_tab[27]
-#define __pyx_n_u_dark_mode __pyx_string_tab[28]
-#define __pyx_n_u_date_of_birth __pyx_string_tab[29]
-#define __pyx_n_u_default __pyx_string_tab[30]
-#define __pyx_n_u_django_contrib_auth_models __pyx_string_tab[31]
-#define __pyx_n_u_django_db __pyx_string_tab[32]
-#define __pyx_n_u_django_db_models_signals __pyx_string_tab[33]
-#define __pyx_n_u_django_dispatch __pyx_string_tab[34]
-#define __pyx_n_u_doc __pyx_string_tab[35]
-#define __pyx_n_u_exists __pyx_string_tab[36]
-#define __pyx_n_u_filter __pyx_string_tab[37]
-#define __pyx_n_u_func __pyx_string_tab[38]
-#define __pyx_n_u_is_coroutine __pyx_string_tab[39]
-#define __pyx_n_u_kwargs __pyx_string_tab[40]
-#define __pyx_n_u_light_css __pyx_string_tab[41]
-#define __pyx_n_u_main __pyx_string_tab[42]
-#define __pyx_n_u_max_length __pyx_string_tab[43]
-#define __pyx_n_u_metaclass __pyx_string_tab[44]
-#define __pyx_n_u_models __pyx_string_tab[45]
-#define __pyx_kp_u_models_py __pyx_string_tab[46]
-#define __pyx_n_u_module __pyx_string_tab[47]
-#define __pyx_n_u_mro_entries __pyx_string_tab[48]
-#define __pyx_n_u_name __pyx_string_tab[49]
-#define __pyx_n_u_name_2 __pyx_string_tab[50]
-#define __pyx_n_u_null __pyx_string_tab[51]
-#define __pyx_n_u_objects __pyx_string_tab[52]
-#define __pyx_n_u_on_delete __pyx_string_tab[53]
-#define __pyx_n_u_panel __pyx_string_tab[54]
+#define __pyx_n_u_adminpanel __pyx_string_tab[20]
+#define __pyx_n_u_app_label __pyx_string_tab[21]
+#define __pyx_n_u_args __pyx_string_tab[22]
+#define __pyx_n_u_asyncio_coroutines __pyx_string_tab[23]
+#define __pyx_n_u_blank __pyx_string_tab[24]
+#define __pyx_n_u_cline_in_traceback __pyx_string_tab[25]
+#define __pyx_n_u_create __pyx_string_tab[26]
+#define __pyx_n_u_create_default_theme __pyx_string_tab[27]
+#define __pyx_n_u_dark_css __pyx_string_tab[28]
+#define __pyx_n_u_dark_mode __pyx_string_tab[29]
+#define __pyx_n_u_date_of_birth __pyx_string_tab[30]
+#define __pyx_n_u_default __pyx_string_tab[31]
+#define __pyx_n_u_django_contrib_auth_models __pyx_string_tab[32]
+#define __pyx_n_u_django_db __pyx_string_tab[33]
+#define __pyx_n_u_django_db_models_signals __pyx_string_tab[34]
+#define __pyx_n_u_django_dispatch __pyx_string_tab[35]
+#define __pyx_n_u_doc __pyx_string_tab[36]
+#define __pyx_n_u_exists __pyx_string_tab[37]
+#define __pyx_n_u_filter __pyx_string_tab[38]
+#define __pyx_n_u_func __pyx_string_tab[39]
+#define __pyx_n_u_is_coroutine __pyx_string_tab[40]
+#define __pyx_n_u_kwargs __pyx_string_tab[41]
+#define __pyx_n_u_light_css __pyx_string_tab[42]
+#define __pyx_n_u_main __pyx_string_tab[43]
+#define __pyx_n_u_max_length __pyx_string_tab[44]
+#define __pyx_n_u_metaclass __pyx_string_tab[45]
+#define __pyx_n_u_models __pyx_string_tab[46]
+#define __pyx_kp_u_models_py __pyx_string_tab[47]
+#define __pyx_n_u_module __pyx_string_tab[48]
+#define __pyx_n_u_mro_entries __pyx_string_tab[49]
+#define __pyx_n_u_name __pyx_string_tab[50]
+#define __pyx_n_u_name_2 __pyx_string_tab[51]
+#define __pyx_n_u_null __pyx_string_tab[52]
+#define __pyx_n_u_objects __pyx_string_tab[53]
+#define __pyx_n_u_on_delete __pyx_string_tab[54]
 #define __pyx_n_u_pop __pyx_string_tab[55]
 #define __pyx_n_u_post_migrate __pyx_string_tab[56]
 #define __pyx_n_u_prepare __pyx_string_tab[57]
@@ -2520,7 +2520,7 @@ static CYTHON_SMALL_CODE int __pyx_m_traverse(PyObject *m, visitproc visit, void
 /* #### Code section: module_code ### */
 
 /* "models.py":15
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return self.user.username
@@ -2640,7 +2640,7 @@ static PyObject *__pyx_pf_6models_11UserProfile___str__(CYTHON_UNUSED PyObject *
   goto __pyx_L0;
 
   /* "models.py":15
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return self.user.username
@@ -2660,7 +2660,7 @@ static PyObject *__pyx_pf_6models_11UserProfile___str__(CYTHON_UNUSED PyObject *
 }
 
 /* "models.py":27
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def save(self, *args, **kwargs):             # <<<<<<<<<<<<<<
  *         if self.default:
@@ -2885,7 +2885,7 @@ static PyObject *__pyx_pf_6models_5Theme_save(CYTHON_UNUSED PyObject *__pyx_self
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "models.py":27
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def save(self, *args, **kwargs):             # <<<<<<<<<<<<<<
  *         if self.default:
@@ -3896,7 +3896,7 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
  *     date_of_birth = models.DateField(null=True, blank=True)
  * 
  *     class Meta:             # <<<<<<<<<<<<<<
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
 */
   __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_mstate_global->__pyx_empty_tuple, __pyx_mstate_global->__pyx_n_u_Meta, __pyx_mstate_global->__pyx_n_u_UserProfile_Meta, (PyObject *) NULL, __pyx_mstate_global->__pyx_n_u_models, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
@@ -3905,17 +3905,17 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
   /* "models.py":13
  * 
  *     class Meta:
- *         app_label = 'panel'             # <<<<<<<<<<<<<<
+ *         app_label = 'adminpanel'             # <<<<<<<<<<<<<<
  * 
  *     def __str__(self):
 */
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_app_label, __pyx_mstate_global->__pyx_n_u_panel) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_mstate_global->__pyx_n_u_app_label, __pyx_mstate_global->__pyx_n_u_adminpanel) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
 
   /* "models.py":12
  *     date_of_birth = models.DateField(null=True, blank=True)
  * 
  *     class Meta:             # <<<<<<<<<<<<<<
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
 */
   __pyx_t_10 = __Pyx_Py3ClassCreate(((PyObject*)&PyType_Type), __pyx_mstate_global->__pyx_n_u_Meta, __pyx_mstate_global->__pyx_empty_tuple, __pyx_t_2, NULL, 0, 0); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 12, __pyx_L1_error)
@@ -3925,7 +3925,7 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "models.py":15
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def __str__(self):             # <<<<<<<<<<<<<<
  *         return self.user.username
@@ -4100,7 +4100,7 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
  *     default = models.BooleanField(default=False)
  * 
  *     class Meta:             # <<<<<<<<<<<<<<
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
 */
   __pyx_t_10 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_mstate_global->__pyx_empty_tuple, __pyx_mstate_global->__pyx_n_u_Meta, __pyx_mstate_global->__pyx_n_u_Theme_Meta, (PyObject *) NULL, __pyx_mstate_global->__pyx_n_u_models, (PyObject *) NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 24, __pyx_L1_error)
@@ -4109,17 +4109,17 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
   /* "models.py":25
  * 
  *     class Meta:
- *         app_label = 'panel'             # <<<<<<<<<<<<<<
+ *         app_label = 'adminpanel'             # <<<<<<<<<<<<<<
  * 
  *     def save(self, *args, **kwargs):
 */
-  if (__Pyx_SetNameInClass(__pyx_t_10, __pyx_mstate_global->__pyx_n_u_app_label, __pyx_mstate_global->__pyx_n_u_panel) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_10, __pyx_mstate_global->__pyx_n_u_app_label, __pyx_mstate_global->__pyx_n_u_adminpanel) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
 
   /* "models.py":24
  *     default = models.BooleanField(default=False)
  * 
  *     class Meta:             # <<<<<<<<<<<<<<
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
 */
   __pyx_t_9 = __Pyx_Py3ClassCreate(((PyObject*)&PyType_Type), __pyx_mstate_global->__pyx_n_u_Meta, __pyx_mstate_global->__pyx_empty_tuple, __pyx_t_10, NULL, 0, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 24, __pyx_L1_error)
@@ -4129,7 +4129,7 @@ __Pyx_RefNannySetupContext("PyInit_models", 0);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
   /* "models.py":27
- *         app_label = 'panel'
+ *         app_label = 'adminpanel'
  * 
  *     def save(self, *args, **kwargs):             # <<<<<<<<<<<<<<
  *         if self.default:
@@ -4304,6 +4304,7 @@ static const __Pyx_StringTabEntry __pyx_string_tab[] = {
   {__pyx_k_UserProfile_Meta, sizeof(__pyx_k_UserProfile_Meta), 0, 1, 1}, /* PyObject cname: __pyx_n_u_UserProfile_Meta */
   {__pyx_k_UserProfile___str, sizeof(__pyx_k_UserProfile___str), 0, 1, 1}, /* PyObject cname: __pyx_n_u_UserProfile___str */
   {__pyx_k__2, sizeof(__pyx_k__2), 0, 1, 0}, /* PyObject cname: __pyx_kp_u__2 */
+  {__pyx_k_adminpanel, sizeof(__pyx_k_adminpanel), 0, 1, 1}, /* PyObject cname: __pyx_n_u_adminpanel */
   {__pyx_k_app_label, sizeof(__pyx_k_app_label), 0, 1, 1}, /* PyObject cname: __pyx_n_u_app_label */
   {__pyx_k_args, sizeof(__pyx_k_args), 0, 1, 1}, /* PyObject cname: __pyx_n_u_args */
   {__pyx_k_asyncio_coroutines, sizeof(__pyx_k_asyncio_coroutines), 0, 1, 1}, /* PyObject cname: __pyx_n_u_asyncio_coroutines */
@@ -4338,7 +4339,6 @@ static const __Pyx_StringTabEntry __pyx_string_tab[] = {
   {__pyx_k_null, sizeof(__pyx_k_null), 0, 1, 1}, /* PyObject cname: __pyx_n_u_null */
   {__pyx_k_objects, sizeof(__pyx_k_objects), 0, 1, 1}, /* PyObject cname: __pyx_n_u_objects */
   {__pyx_k_on_delete, sizeof(__pyx_k_on_delete), 0, 1, 1}, /* PyObject cname: __pyx_n_u_on_delete */
-  {__pyx_k_panel, sizeof(__pyx_k_panel), 0, 1, 1}, /* PyObject cname: __pyx_n_u_panel */
   {__pyx_k_pop, sizeof(__pyx_k_pop), 0, 1, 1}, /* PyObject cname: __pyx_n_u_pop */
   {__pyx_k_post_migrate, sizeof(__pyx_k_post_migrate), 0, 1, 1}, /* PyObject cname: __pyx_n_u_post_migrate */
   {__pyx_k_prepare, sizeof(__pyx_k_prepare), 0, 1, 1}, /* PyObject cname: __pyx_n_u_prepare */
