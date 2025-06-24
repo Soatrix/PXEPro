@@ -4,11 +4,10 @@ After=network.target
 
 [Service]
 User=pxepro
-Group=pxepro
+Group=www-data
 WorkingDirectory=/var/www/pxepro
+RuntimeDirectory=pxepro
 ExecStart=/var/www/pxepro/venv/bin/waitress-serve --unix-socket=/run/pxepro/server.sock app.wsgi:application
-ExecStartPost=/bin/chmod 660 /run/pxepro/server.sock
-ExecStartPost=/bin/chown pxepro:www-data /run/pxepro/server.sock
 Restart=always
 
 [Install]
