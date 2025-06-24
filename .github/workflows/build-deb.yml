@@ -181,9 +181,10 @@ jobs:
           systemctl restart pxepro
           
           chown pxepro:www-data /run/pxepro/server.sock
+          chmod 775 /run/pxepro
           chmod 660 /run/pxepro/server.sock
           
-          chown -R www-data:www-data $INSTALL_DIR
+          chown -R pxepro:www-data $INSTALL_DIR
           
           EOF
 
@@ -378,9 +379,10 @@ jobs:
           systemctl restart pxepro
           
           chown pxepro:www-data /run/pxepro/server.sock
+          chmod 775 /run/pxepro
           chmod 660 /run/pxepro/server.sock
           
-          chown -R www-data:www-data $INSTALL_DIR
+          chown -R pxepro:www-data $INSTALL_DIR
           
           EOF
 
