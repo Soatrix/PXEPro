@@ -177,12 +177,18 @@ jobs:
           systemctl daemon-reload
           systemctl enable nginx --now
           systemctl enable dnsmasq --now
-          systemctl enable pxepro
+          systemctl enable pxepro --now
           systemctl restart pxepro
           
-          chown pxepro:www-data /run/pxepro/server.sock
-          chmod 775 /run/pxepro
-          chmod 660 /run/pxepro/server.sock
+          for i in {1..10}; do
+            if [ -S /run/pxepro/server.sock ]; then
+                chmod 660 /run/pxepro/server.sock
+                chown pxepro:www-data /run/pxepro/server.sock
+                chmod 775 /run/pxepro
+                break
+            fi
+            sleep 0.5
+          done
           
           chown -R pxepro:www-data $INSTALL_DIR
           
@@ -378,9 +384,15 @@ jobs:
           systemctl enable pxepro
           systemctl restart pxepro
           
-          chown pxepro:www-data /run/pxepro/server.sock
-          chmod 775 /run/pxepro
-          chmod 660 /run/pxepro/server.sock
+          for i in {1..10}; do
+            if [ -S /run/pxepro/server.sock ]; then
+                chmod 660 /run/pxepro/server.sock
+                chown pxepro:www-data /run/pxepro/server.sock
+                chmod 775 /run/pxepro
+                break
+            fi
+            sleep 0.5
+          done
           
           chown -R pxepro:www-data $INSTALL_DIR
           
