@@ -6,7 +6,7 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/pxepro
-ExecStart=/var/www/pxepro/venv/bin/waitress-serve --unix-socket=/var/www/pxepro/server.sock app.wsgi:application
+ExecStart=/var/www/pxepro/venv/bin/waitress-serve --unix-socket=/run/pxepro/server.sock app.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
